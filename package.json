@@ -1,0 +1,9 @@
+{
+  "name": "js-s3-upload-lambda-layer",
+  "version": "1.0.0",
+  "main": "src/lambda-contents.js",
+  "scripts": {
+  },
+  "author": "Dustin Toff",
+  "license": "Apache-2.0"
+}
