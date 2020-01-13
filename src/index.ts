@@ -1,6 +1,6 @@
 import * as S3 from "aws-sdk/clients/s3";
-const fs = require("fs");
-const path = require("path");
+import * as fs from "fs";
+import * as path from "path";
 import * as https from "https";
 import * as url from "url";
 
@@ -202,7 +202,7 @@ function listAllFiles(root: string): string[] {
     return ret;
 }
 
-function uploadFile(s3: S3, bucketName: string, objectPrefix: string | undefined, fileName: string | undefined, callback: ResultCallback) {
+function uploadFile(s3: S3, bucketName: string, objectPrefix: string | undefined, fileName: string, callback: ResultCallback) {
     const fileContent = fs.readFileSync(fileName);
 
     const key = (objectPrefix || "") + fileName;

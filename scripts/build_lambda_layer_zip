@@ -1,0 +1,15 @@
+#!/bin/bash
+
+build_dir=dist
+lambda_file="${build_dir}/s3-file-uploader.js"
+tmp_dir="${build_dir}/tmp"
+lambda_layer_dir="${tmp_dir}/nodejs/node_modules"
+
+rm -rf "${tmp_dir}"
+mkdir -p "${lambda_layer_dir}"
+cp "${build_dir}/s3-file-uploader.js" "${lambda_layer_dir}"
+(
+    cd "${tmp_dir}"
+    zip -r ../layer.zip nodejs
+)
+ 

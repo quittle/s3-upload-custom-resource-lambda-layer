@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  S3UploadCustomResourceLayer:
+    Type: AWS::Serverless::LayerVersion 
+    Properties:
+      LayerName: S3UploadCustomResource
+      CompatibleRuntimes: [ nodejs12.x ]
+      ContentUri: dist/layer.zip
+      LicenseInfo: Apache-2.0
+Outputs:
+  LayerArn:
+    Description: ARN of the Lambda Layer for other to consume
+    Value: !Ref S3UploadCustomResourceLayer

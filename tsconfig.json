@@ -6,6 +6,5 @@
         "target": "es6",
         "strictNullChecks": true,
         "moduleResolution": "node"
-        // "typeRoots": ["./node_modules/@types"]
     }
 }

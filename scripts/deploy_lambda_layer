@@ -1,0 +1,24 @@
+#!/bin/bash -ex
+
+build_dir=dist
+generated_template="${build_dir}/cloudformation-generated.yml"
+stack_name=s3-upload-custom-resource-lambda-layer
+
+aws cloudformation package \
+        --template-file cloudformation.yml \
+        --s3-bucket sam-915290536872 \
+        --output-template-file "${generated_template}"
+
+aws cloudformation deploy \
+        --template-file "${generated_template}" \
+        --stack-name "${stack_name}" \
+        --no-fail-on-empty-changeset
+
+stack_description="$(aws cloudformation describe-stacks \
+        --stack-name "${stack_name}")"
+
+layer_arn="$(echo "${stack_description}" | \
+        jq '.Stacks[] | select(.StackName=="'"${stack_name}"'") | .Outputs[] | select(.OutputKey=="LayerArn") | .OutputValue' --raw-output
+)"
+
+echo "Uploader Lambda Layer ARN: ${layer_arn}"

@@ -1,16 +1,15 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/lambda-contents.ts',
+    entry: './src/index.ts',
     output: {
-        filename: 's3-file-uploader.js',
+        filename: 's3-upload-custom-resource.js',
         path: path.resolve(__dirname, 'dist'),
     },
     mode: 'production',
     target: 'node',
     externals: {
-        'aws-sdk': 'aws-sdk', // Provided by the Lambda environment
-        'aws-sdk/clients/s3': 'aws-sdk/clients/s3',
+        'aws-sdk/clients/s3': 'aws-sdk/clients/s3', // Provided by the Lambda environment
     },
     module: {
         rules: [
