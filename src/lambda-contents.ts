@@ -1,11 +1,13 @@
-const aws = require("aws-sdk");
+import * as S3 from "aws-sdk/clients/s3";
 const fs = require("fs");
 const path = require("path");
+import * as https from "https";
+import * as url from "url";
 
-const ResponseStatus = {
-    SUCCESS: "SUCCESS",
-    FAILED: "FAILED",
-};
+enum ResponseStatus {
+    SUCCESS = "SUCCESS",
+    FAILED = "FAILED",
+}
 
 const RequestType = {
     CREATE: "Create",
@@ -15,17 +17,26 @@ const RequestType = {
 
 const CustomParameters = {
     BUCKET_NAME: "BucketName",
-    CONTENTS: "Contents",
     OBJECT_PREFIX: "ObjectPrefix",
 };
 
-exports.handler = function(event, context) { 
+interface ResultType {
+    status: ResponseStatus,
+    reason?: string,
+}
+
+type ResultCallback = (result: ResultType) => void;
+
+type CloudformationEvent = any;
+type CloudformationContext = any;
+
+exports.handler = function(event: CloudformationEvent, context: CloudformationContext) { 
     console.log("REQUEST RECEIVED:\n" + JSON.stringify(event));
 
     const dir = fs.readdirSync(".");
     console.log(`Contents: ${JSON.stringify(dir)}`)
 
-    const callback = (result) => {
+    const callback: ResultCallback = (result: ResultType) => {
         const responseData = {
             example: "response data"
         }
@@ -34,7 +45,7 @@ exports.handler = function(event, context) {
     };
 
     try {
-        validateArguments(event, callback);
+        validateArguments(event);
     } catch (errorMessage) {
         callback({
             status: ResponseStatus.FAILED,
@@ -62,16 +73,16 @@ exports.handler = function(event, context) {
     }
 };
 
-function validateArguments(event) {
+function validateArguments(event: CloudformationEvent) {
     const bucketName = getNewBucketName(event);
     if (!bucketName) {
         throw `${CustomParameters.BUCKET_NAME} must be specified.`;
     }
 }
 
-function handleCreate(event, context, callback) {
+function handleCreate(event: CloudformationEvent, context: CloudformationContext, callback: ResultCallback) {
     const s3 = getS3Client();
-    const bucketName = getNewBucketName(event);
+    const bucketName = getNewBucketName(event) as string;
     const objectPrefix = getObjectPrefix(event);
     s3.listObjectsV2({Bucket: bucketName, Prefix: objectPrefix, MaxKeys: 1}, (err, data) => {
         if (err) {
@@ -81,8 +92,8 @@ function handleCreate(event, context, callback) {
             });
             return;
         };
-
-        if (data.KeyCount > 0) {
+        
+        if (data.KeyCount && data.KeyCount > 0) {
             callback({
                 status: ResponseStatus.FAILED,
                 reason: "Bucket must be empty",
@@ -94,9 +105,9 @@ function handleCreate(event, context, callback) {
     });
 }
 
-function handleUpdate(event, context, callback) {
+function handleUpdate(event: CloudformationEvent, context: CloudformationContext, callback: ResultCallback) {
     const s3 = getS3Client();
-    const bucketName = getNewBucketName(event);
+    const bucketName = getNewBucketName(event) as string;
     const objectPrefix = getObjectPrefix(event);
     deleteAllFiles(s3, bucketName, objectPrefix, result => {
         if (result.status === ResponseStatus.FAILED) {
@@ -108,14 +119,14 @@ function handleUpdate(event, context, callback) {
     });
 }
 
-function handleDelete(event, context, callback) {
+function handleDelete(event: CloudformationEvent, context: CloudformationContext, callback: ResultCallback) {
     const s3 = getS3Client();
-    const bucketName = getNewBucketName(event);
+    const bucketName = getNewBucketName(event) as string;
     const objectPrefix = getObjectPrefix(event);
     deleteAllFiles(s3, bucketName, objectPrefix, callback);
 }
 
-function deleteAllFiles(s3, bucketName, objectPrefix, callback) {
+function deleteAllFiles(s3: S3, bucketName: string, objectPrefix: string | undefined, callback: ResultCallback) {
     s3.listObjectsV2({Bucket: bucketName, Prefix: objectPrefix}, (err, data) => {
         if (err) {
             callback({
@@ -135,10 +146,10 @@ function deleteAllFiles(s3, bucketName, objectPrefix, callback) {
         const deleteParams = {
             Bucket: bucketName,
             Delete: {
-                Objects: data.Contents.map(content => ({ Key: content.Key })),
+                Objects: data.Contents?.map(content => ({ Key: content.Key })),
             }
-        };
-        console.log(`data: ${JSON.stringify(data)} DeleteParams: ${JSON.stringify(deleteParams)}`);
+        } as S3.DeleteObjectsRequest;
+        
         s3.deleteObjects(deleteParams, (err, data) => {
             if (err) {
                 callback({
@@ -153,11 +164,10 @@ function deleteAllFiles(s3, bucketName, objectPrefix, callback) {
     });
 }
 
-function syncFiles(event, callback) {
+function syncFiles(event: CloudformationEvent, callback: ResultCallback) {
     const s3 = getS3Client();
-    const bucketName = getNewBucketName(event);
+    const bucketName = getNewBucketName(event) as string;
     const objectPrefix = getObjectPrefix(event);
-    const contents = getContents(event);
 
     const allFiles = listAllFiles(".");
     let successCount = 0;
@@ -178,9 +188,9 @@ function syncFiles(event, callback) {
     });
 }
 
-function listAllFiles(root) {
+function listAllFiles(root: string): string[] {
     const dirs = fs.readdirSync(root, {withFileTypes: true});
-    let ret = [];
+    let ret: string[] = [];
     for (const f of dirs) {
         const filePath = path.join(root, f.name);
         if (f.isDirectory()) {
@@ -192,7 +202,7 @@ function listAllFiles(root) {
     return ret;
 }
 
-function uploadFile(s3, bucketName, objectPrefix, fileName, callback) {
+function uploadFile(s3: S3, bucketName: string, objectPrefix: string | undefined, fileName: string | undefined, callback: ResultCallback) {
     const fileContent = fs.readFileSync(fileName);
 
     const key = (objectPrefix || "") + fileName;
@@ -205,7 +215,7 @@ function uploadFile(s3, bucketName, objectPrefix, fileName, callback) {
     };
 
     // Uploading files to the bucket
-    s3.upload(params, function(err, data) {
+    s3.upload(params, (err: Error, data: S3.ManagedUpload.SendData) => {
         if (err) {
             callback({
                 status: ResponseStatus.FAILED,
@@ -220,32 +230,24 @@ function uploadFile(s3, bucketName, objectPrefix, fileName, callback) {
     });
 }
 
-function computePhysicalId(event) {
+function computePhysicalId(event: CloudformationEvent): string {
     return `Bucket:${getNewBucketName(event)} ObjectPrefix: ${getObjectPrefix(event)}`;
 }
 
-function getContents(event) {
-    return event.ResourceProperties[CustomParameters.CONTENTS];
-}
-
-function getNewBucketName(event) {
+function getNewBucketName(event: CloudformationEvent): string | undefined {
     return event.ResourceProperties[CustomParameters.BUCKET_NAME];
 }
 
-function getObjectPrefix(event) {
+function getObjectPrefix(event: CloudformationEvent): string | undefined {
     return event.ResourceProperties[CustomParameters.OBJECT_PREFIX];
 }
 
-function getOldBucketName(event) {
-    return event.OldResourceProperties[CustomParameters.BUCKET_NAME];
-}
-
 function getS3Client() {
-    return new aws.S3();
+    return new S3();
 }
 
 // Send response to the pre-signed S3 URL 
-function sendResponse(event, context, responseStatus, responseReason, responseData) {
+function sendResponse(event: CloudformationEvent, context: CloudformationContext, responseStatus: ResponseStatus, responseReason?: string, responseData?: object) {
     var responseBody = JSON.stringify({
         Status: responseStatus,
         Reason: responseReason,
@@ -257,9 +259,6 @@ function sendResponse(event, context, responseStatus, responseReason, responseDa
     });
  
     console.log("RESPONSE BODY:\n", responseBody);
- 
-    var https = require("https");
-    var url = require("url");
  
     var parsedUrl = url.parse(event.ResponseURL);
     var options = {
