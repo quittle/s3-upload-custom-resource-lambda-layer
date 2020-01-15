@@ -7,7 +7,7 @@ lambda_layer_dir="${tmp_dir}/nodejs/node_modules"
 
 rm -rf "${tmp_dir}"
 mkdir -p "${lambda_layer_dir}"
-cp "${build_dir}/s3-file-uploader.js" "${lambda_layer_dir}"
+cp "${build_dir}/s3-upload-custom-resource.js" "${lambda_layer_dir}"
 (
     cd "${tmp_dir}"
     zip -r ../layer.zip nodejs

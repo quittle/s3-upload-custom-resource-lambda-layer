@@ -6,11 +6,8 @@ module.exports = {
         filename: 's3-upload-custom-resource.js',
         path: path.resolve(__dirname, 'dist'),
     },
-    mode: 'production',
+    mode: 'development',
     target: 'node',
-    externals: {
-        'aws-sdk/clients/s3': 'aws-sdk/clients/s3', // Provided by the Lambda environment
-    },
     module: {
         rules: [
             {

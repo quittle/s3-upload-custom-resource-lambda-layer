@@ -1,0 +1,2 @@
+If you change the bucket being referenced by an uploader, it will update the policy on the function before trying to delete the resource, leaving resources stranded
+

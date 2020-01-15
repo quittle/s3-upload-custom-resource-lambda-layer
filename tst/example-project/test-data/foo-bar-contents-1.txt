@@ -1,0 +1,22 @@
+[
+  {
+    "Key": "bar/file.txt",
+    "Size": 19,
+    "ETag": "\"f073e049e10afbe5400a1de9f4fc6a77\""
+  },
+  {
+    "Key": "bar/folder/file.txt",
+    "Size": 15,
+    "ETag": "\"3b2155a4e6e842300994c30e21ef3e97\""
+  },
+  {
+    "Key": "foo/file.txt",
+    "Size": 19,
+    "ETag": "\"f073e049e10afbe5400a1de9f4fc6a77\""
+  },
+  {
+    "Key": "foo/folder/file.txt",
+    "Size": 15,
+    "ETag": "\"3b2155a4e6e842300994c30e21ef3e97\""
+  }
+]

@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  S3UploadLambdaLayerArn:
+    Type: String
+    Description: The ARN of the Lambda layer to test
+  UploadedContentVersion:
+    Type: String
+    Description: The CodeUri of the Lambda in the generated Cloudformation template built with `aws cloudformation package`.
+Resources:
+  RootTestBucket:
+    Type: AWS::S3::Bucket
+  FooBarTestBucket:
+    Type: AWS::S3::Bucket
+  TestUploaderLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers: [ !Ref S3UploadLambdaLayerArn ]
+      CodeUri: !!!source-root!!!
+      Handler: s3-upload-custom-resource.handler
+      Runtime: nodejs12.x
+      Policies:
+      - S3CrudPolicy:
+          BucketName: !Ref RootTestBucket
+      - S3CrudPolicy:
+          BucketName: !Ref FooBarTestBucket
+  UploadSrcToRootDir:
+    Type: Custom::UploadFilesToS3
+    Properties:
+      ServiceToken: !GetAtt TestUploaderLambda.Arn
+      BucketName: !Ref RootTestBucket
+      ContentVersion: !Ref UploadedContentVersion
+  UploadSrcToFooDir:
+    Type: Custom::UploadFilesToS3
+    Properties:
+      ServiceToken: !GetAtt TestUploaderLambda.Arn
+      BucketName: !Ref FooBarTestBucket
+      ContentVersion: !Ref UploadedContentVersion
+      ObjectPrefix: foo/
+  UploadSrcToBarDir:
+    Type: Custom::UploadFilesToS3
+    Properties:
+      ServiceToken: !GetAtt TestUploaderLambda.Arn
+      BucketName: !Ref FooBarTestBucket
+      ContentVersion: !Ref UploadedContentVersion
+      ObjectPrefix: bar/
+Outputs:
+  RootTestBucketName:
+    Description: Bucket being uploaded to with no prefix
+    Value: !Ref RootTestBucket
+  FooBarTestBucketName:
+    Description: Bucket being uploaded to with foo and bar prefixes
+    Value: !Ref FooBarTestBucket
