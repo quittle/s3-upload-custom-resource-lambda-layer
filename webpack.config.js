@@ -6,7 +6,7 @@ module.exports = {
         filename: 's3-upload-custom-resource.js',
         path: path.resolve(__dirname, 'dist'),
     },
-    mode: 'development',
+    mode: 'production',
     target: 'node',
     module: {
         rules: [

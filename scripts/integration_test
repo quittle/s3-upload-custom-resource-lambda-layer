@@ -1,0 +1,14 @@
+#!/bin/bash -e
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+stack_name=s3-upload-custom-resource-lambda-layer
+
+stack_description="$(aws cloudformation describe-stacks \
+        --stack-name "${stack_name}")"
+
+layer_arn="$(echo "${stack_description}" | \
+        jq '.Stacks[] | select(.StackName=="'"${stack_name}"'") | .Outputs[] | select(.OutputKey=="LayerArn") | .OutputValue' --raw-output
+)"
+
+"${repo_root}/tst/example-project/run_test" "${layer_arn}"

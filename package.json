@@ -1,16 +1,17 @@
 {
     "name": "s3-upload-custom-resource-lambda-layer",
     "version": "1.0.0",
+    "author": "Dustin Toff",
+    "license": "Apache-2.0",
+    "engines": {
+        "node": ">=10.0.0"
+    },
     "scripts": {
         "build": "webpack",
         "package": "scripts/build_lambda_layer_zip",
         "deploy": "scripts/deploy_lambda_layer",
-        "release": "npm run build && npm run package && npm run deploy"
-    },
-    "author": "Dustin Toff",
-    "license": "Apache-2.0",
-    "engines": {
-        "node": ">=12.0.0"
+        "integration-test": "scripts/integration_test",
+        "release": "npm run build && npm run package && npm run deploy && npm run integration-test"
     },
     "devDependencies": {
         "@types/aws-sdk": "^2.7.0",

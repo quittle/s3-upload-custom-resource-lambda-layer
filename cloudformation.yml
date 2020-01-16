@@ -8,6 +8,12 @@ Resources:
       CompatibleRuntimes: [ nodejs12.x ]
       ContentUri: dist/layer.zip
       LicenseInfo: Apache-2.0
+  S3UploadCustomResourceLayerPermission:
+    Type: AWS::Lambda::LayerVersionPermission
+    Properties:
+      Action: lambda:GetLayerVersion
+      LayerVersionArn: !Ref S3UploadCustomResourceLayer
+      Principal: "*"
 Outputs:
   LayerArn:
     Description: ARN of the Lambda Layer for other to consume
