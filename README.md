@@ -1,4 +1,4 @@
-# S3 Upload Custom Resource Lambda Layer
+# S3 Upload Custom Resource Lambda Layer [![Build Status](https://travis-ci.com/quittle/s3-upload-custom-resource-lambda-layer.svg?branch=master)](https://travis-ci.com/quittle/s3-upload-custom-resource-lambda-layer)
 
 This project builds an [AWS Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) to deploy files to S3 buckets as part of a CloudFormation deployment. Using [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html), you can use a Lambda function and a [CloudFormation Custom Resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources.html) to upload files to your S3 bucket. All the deployment logic is baked into the layer provided by this project so the only things needed from the consumer is the files, the generated Lambda function, and the permissions to deploy to the bucket. Here is a minimal example of how to use it.
 
