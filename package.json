@@ -9,9 +9,11 @@
     "scripts": {
         "build": "webpack",
         "package": "scripts/build_lambda_layer_zip",
-        "deploy": "scripts/deploy_lambda_layer",
-        "integration-test": "scripts/integration_test",
-        "release": "npm run build && npm run package && npm run deploy && npm run integration-test"
+        "deploy": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer",
+        "deploy-beta": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer-beta",
+        "integration-test": "scripts/integration_test s3-upload-custom-resource-lambda-layer-beta",
+        "build-and-test": "npm run build && npm run package && npm run deploy-beta && npm run integration-test",
+        "release": "npm run deploy"
     },
     "devDependencies": {
         "@types/aws-sdk": "^2.7.0",

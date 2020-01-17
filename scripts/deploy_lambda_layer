@@ -1,8 +1,9 @@
 #!/bin/bash -ex
 
+stack_name="$1"
+
 build_dir=dist
 generated_template="${build_dir}/cloudformation-generated.yml"
-stack_name=s3-upload-custom-resource-lambda-layer
 
 aws cloudformation package \
         --template-file cloudformation.yml \
