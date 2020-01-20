@@ -19,6 +19,7 @@ Resources:
       CodeUri: !!!source-root!!!
       Handler: s3-upload-custom-resource.handler
       Runtime: nodejs12.x
+      Timeout: 30
       Policies:
       - S3CrudPolicy:
           BucketName: !Ref RootTestBucket
