@@ -9,15 +9,20 @@
     "scripts": {
         "build": "webpack",
         "package": "scripts/build_lambda_layer_zip",
+        "lint": "npx eslint . --ext .js,.ts",
+        "lint-fix": "npx eslint . --ext .js,.ts --fix",
         "deploy": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer",
         "deploy-beta": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer-beta",
         "integration-test": "scripts/integration_test s3-upload-custom-resource-lambda-layer-beta",
-        "build-and-test": "npm run build && npm run package && npm run deploy-beta && npm run integration-test",
+        "build-and-test": "npm run build && npm run lint && npm run package && npm run deploy-beta && npm run integration-test",
         "release": "npm run deploy"
     },
     "devDependencies": {
         "@types/aws-sdk": "^2.7.0",
         "@types/node": "^13.1.6",
+        "@typescript-eslint/eslint-plugin": "^2.17.0",
+        "@typescript-eslint/parser": "^2.17.0",
+        "eslint": "^6.8.0",
         "ts-loader": "^6.2.1",
         "typescript": "^3.7.4",
         "webpack": "^4.41.5",

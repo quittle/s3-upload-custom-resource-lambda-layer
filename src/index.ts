@@ -8,38 +8,15 @@ import { CreateHandler } from "./handle-create";
 import { DeleteHandler } from "./handle-delete";
 import { UpdateHandler } from "./handle-update";
 
-exports.handler = async function(event: CloudformationEvent, context: CloudformationContext): Promise<void> {
-    console.log("REQUEST RECEIVED:\n" + JSON.stringify(event));
+function getNewBucketName(event: CloudformationEvent): string | undefined {
+    return event.ResourceProperties[CustomParameters.BUCKET_NAME];
+}
 
-    const callback: ResultCallback = async (result: ResultType) => {
-        await sendResponse(event, context, result.status, result.reason);
-    };
+function getObjectPrefix(event: CloudformationEvent): string | undefined {
+    return event.ResourceProperties[CustomParameters.OBJECT_PREFIX];
+}
 
-    try {
-        validateArguments(event);
-    } catch (errorMessage) {
-        return await callback({
-            status: ResponseStatus.FAILED,
-            reason: errorMessage,
-        });
-    }
-
-    switch (event.RequestType) {
-        case RequestType.CREATE:
-            return await new CreateHandler().handle(event, context, callback);
-        case RequestType.UPDATE:
-            return await new UpdateHandler().handle(event, context, callback);
-        case RequestType.DELETE:
-            return await new DeleteHandler().handle(event, context, callback);
-        default:
-            return await callback({
-                status: ResponseStatus.FAILED,
-                reason: `Unknown request type ${event.RequestType}`,
-            });
-    }
-};
-
-function validateArguments(event: CloudformationEvent) {
+function validateArguments(event: CloudformationEvent): void {
     const bucketName = getNewBucketName(event);
     if (!bucketName) {
         throw `${CustomParameters.BUCKET_NAME} must be specified.`;
@@ -50,17 +27,9 @@ function computePhysicalId(event: CloudformationEvent): string {
     return `Bucket:${getNewBucketName(event)} ObjectPrefix: ${getObjectPrefix(event)}`;
 }
 
-function getNewBucketName(event: CloudformationEvent): string | undefined {
-    return event.ResourceProperties[CustomParameters.BUCKET_NAME];
-}
-
-function getObjectPrefix(event: CloudformationEvent): string | undefined {
-    return event.ResourceProperties[CustomParameters.OBJECT_PREFIX];
-}
-
 // Send response to the pre-signed S3 URL
 async function sendResponse(event: CloudformationEvent, context: CloudformationContext, responseStatus: ResponseStatus, responseReason?: string, responseData?: object): Promise<void> {
-    var responseBody = JSON.stringify({
+    const responseBody = JSON.stringify({
         Status: responseStatus,
         Reason: responseReason,
         PhysicalResourceId: computePhysicalId(event),
@@ -72,8 +41,8 @@ async function sendResponse(event: CloudformationEvent, context: CloudformationC
 
     console.log("RESPONSE BODY:\n", responseBody);
 
-    var parsedUrl = url.parse(event.ResponseURL);
-    var options = {
+    const parsedUrl = url.parse(event.ResponseURL);
+    const options = {
         hostname: parsedUrl.hostname,
         port: 443,
         path: parsedUrl.path,
@@ -106,3 +75,34 @@ async function sendResponse(event: CloudformationEvent, context: CloudformationC
         console.log("End of sendResponse");
     });
 }
+
+exports.handler = async function(event: CloudformationEvent, context: CloudformationContext): Promise<void> {
+    console.log("REQUEST RECEIVED:\n" + JSON.stringify(event));
+
+    const callback: ResultCallback = async (result: ResultType) => {
+        await sendResponse(event, context, result.status, result.reason);
+    };
+
+    try {
+        validateArguments(event);
+    } catch (errorMessage) {
+        return await callback({
+            status: ResponseStatus.FAILED,
+            reason: errorMessage,
+        });
+    }
+
+    switch (event.RequestType) {
+        case RequestType.CREATE:
+            return await new CreateHandler().handle(event, callback);
+        case RequestType.UPDATE:
+            return await new UpdateHandler().handle(event, callback);
+        case RequestType.DELETE:
+            return await new DeleteHandler().handle(event, callback);
+        default:
+            return await callback({
+                status: ResponseStatus.FAILED,
+                reason: `Unknown request type ${event.RequestType}`,
+            });
+    }
+};

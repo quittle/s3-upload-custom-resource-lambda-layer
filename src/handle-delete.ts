@@ -4,7 +4,7 @@ import { SimpleFs } from "./simple-fs";
 import { ResponseStatus } from "./cloudformation-types";
 
 export class DeleteHandler extends EventHandler {
-    protected async handleEvent(parameters: RequestParameters, simpleS3: SimpleS3, simpleFs: SimpleFs): Promise<ResultType> {
+    protected async handleEvent(parameters: RequestParameters, simpleS3: SimpleS3, _simpleFs: SimpleFs): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
 
         let keys;

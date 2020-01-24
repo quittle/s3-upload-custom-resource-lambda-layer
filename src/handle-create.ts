@@ -1,4 +1,4 @@
-import { EventHandler, ResultCallback, RequestParameters, ResultType } from "./handler";
+import { EventHandler, RequestParameters, ResultType } from "./handler";
 import { ResponseStatus } from "./cloudformation-types";
 import { SimpleS3 } from "./simple-s3";
 import { SimpleFs } from "./simple-fs";

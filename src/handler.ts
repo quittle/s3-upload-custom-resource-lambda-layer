@@ -1,23 +1,23 @@
-import { CloudformationEvent, CloudformationContext, ResponseStatus } from "./cloudformation-types";
+import { CloudformationEvent, ResponseStatus } from "./cloudformation-types";
 import { SimpleS3 } from "./simple-s3";
 import { CustomParameters } from "./resources";
 import { SimpleFs } from "./simple-fs";
 
 export interface ResultType {
-    status: ResponseStatus,
-    reason?: string,
+    status: ResponseStatus;
+    reason?: string;
 }
 
 export type ResultCallback = (result: ResultType) => Promise<void>;
 
 export interface RequestParameters {
-    physicalId: string,
-    bucketName: string,
-    objectPrefix?: string,
+    physicalId: string;
+    bucketName: string;
+    objectPrefix?: string;
 }
 
 export abstract class EventHandler {
-    public async handle(event: CloudformationEvent, context: CloudformationContext, callback: ResultCallback) {
+    public async handle(event: CloudformationEvent, callback: ResultCallback): Promise<void> {
         const bucketName = event.ResourceProperties[CustomParameters.BUCKET_NAME];
         const objectPrefix = event.ResourceProperties[CustomParameters.OBJECT_PREFIX];
         const physicalId = `Bucket:${bucketName} ObjectPrefix: ${objectPrefix}`;

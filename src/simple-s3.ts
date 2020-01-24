@@ -14,6 +14,7 @@ export class SimpleS3 {
     public async listObjects(bucketName: string, objectPrefix: string | undefined): Promise<string[]> {
         let ret: string[] = [];
         let continuationToken: string | undefined;
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             const params: S3.ListObjectsV2Request = {Bucket: bucketName, Prefix: objectPrefix};
             if (continuationToken) {
