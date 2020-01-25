@@ -9,7 +9,7 @@ export enum RequestType {
     DELETE = "Delete"
 }
 
-interface StringObject {
+export interface StringObject {
     [key: string]: string;
 }
 

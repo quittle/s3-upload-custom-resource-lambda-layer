@@ -8,10 +8,7 @@ import {
     CloudformationEvent,
     CloudformationContext
 } from "./cloudformation-types";
-import { ResultCallback, ResultType } from "./handler";
-import { CreateHandler } from "./handle-create";
-import { DeleteHandler } from "./handle-delete";
-import { UpdateHandler } from "./handle-update";
+import { ResultCallback, ResultType, CreateHandler, UpdateHandler, DeleteHandler } from "./handler";
 
 function getNewBucketName(event: CloudformationEvent): string | undefined {
     return event.ResourceProperties[CustomParameters.BUCKET_NAME];

@@ -1,7 +1,7 @@
-import { CloudformationEvent, ResponseStatus } from "./cloudformation-types";
-import { SimpleS3 } from "./simple-s3";
-import { CustomParameters } from "./resources";
-import { SimpleFs } from "./simple-fs";
+import { CloudformationEvent, ResponseStatus } from "../cloudformation-types";
+import { SimpleS3 } from "../simple-s3";
+import { CustomParameters } from "../resources";
+import { SimpleFs } from "../simple-fs";
 
 export interface ResultType {
     status: ResponseStatus;
