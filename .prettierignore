@@ -1,0 +1,14 @@
+# Intentionally not YAML to allow replacing the CodeUri
+/tst/example-project/cloudformation.yml
+
+# Don't mess with this as it's managed by NPM
+/package-lock.json
+
+# Shell scripts aren't supported
+/scripts/*
+/tst/example-project/run_test
+
+*.zip
+*.txt
+.gitignore
+.prettierignore

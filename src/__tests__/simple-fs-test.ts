@@ -6,11 +6,15 @@ describe("SimpleFs", () => {
     describe("readFile", () => {
         test("non-existent file", () => {
             const fileName = "fake-file-that-does-not-exist.txt";
-            expect(() => simpleFs.readFile(fileName)).toThrowError(`ENOENT: no such file or directory, open '${fileName}`);
+            expect(() => simpleFs.readFile(fileName)).toThrowError(
+                `ENOENT: no such file or directory, open '${fileName}`
+            );
         });
 
         test("directory fails", () => {
-            expect(() => simpleFs.readFile(".")).toThrowError("EISDIR: illegal operation on a directory, read");
+            expect(() => simpleFs.readFile(".")).toThrowError(
+                "EISDIR: illegal operation on a directory, read"
+            );
         });
 
         test("real file", () => {
@@ -26,12 +30,16 @@ describe("SimpleFs", () => {
     describe("listFiles", () => {
         test("non-existent directory", () => {
             const directory = "fake-directory-that-does-not-exist";
-            expect(() => simpleFs.listFiles(directory)).toThrowError(`ENOENT: no such file or directory, scandir '${directory}'`);
+            expect(() => simpleFs.listFiles(directory)).toThrowError(
+                `ENOENT: no such file or directory, scandir '${directory}'`
+            );
         });
 
         test("file fails", () => {
             const fileName = "package.json";
-            expect(() => simpleFs.listFiles(fileName)).toThrowError(`ENOTDIR: not a directory, scandir '${fileName}'`);
+            expect(() => simpleFs.listFiles(fileName)).toThrowError(
+                `ENOTDIR: not a directory, scandir '${fileName}'`
+            );
         });
 
         test("real directory", () => {
@@ -42,12 +50,14 @@ describe("SimpleFs", () => {
 
             expect(files.length).toEqual(new Set(files).size);
 
-            expect(files).toEqual(expect.arrayContaining([
-                "package.json", // Root file
-                ".gitignore", // Hidden file
-                "src/index.ts", // In directory
-                "src/__tests__/simple-fs-test.ts", // Deep file in directory
-            ]));
+            expect(files).toEqual(
+                expect.arrayContaining([
+                    "package.json", // Root file
+                    ".gitignore", // Hidden file
+                    "src/index.ts", // In directory
+                    "src/__tests__/simple-fs-test.ts" // Deep file in directory
+                ])
+            );
 
             // Don't include folders, just files
             expect(files).not.toEqual(expect.arrayContaining(["src"]));
@@ -60,4 +70,4 @@ describe("SimpleFs", () => {
             }
         });
     });
-})
+});

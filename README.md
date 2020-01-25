@@ -5,34 +5,36 @@ This project builds an [AWS Lambda Layer](https://docs.aws.amazon.com/lambda/lat
 ## Example CloudFormation Template
 
 ```yaml
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Parameters:
-  DeploymentContentVersion:
-    Type: String
-    Description: This can be any unique string that identifies the files you are deploying.
+    DeploymentContentVersion:
+        Type: String
+        Description: This can be any unique string that identifies the files you are deploying.
 Resources:
-  WebsiteBucket:
-    Type: AWS::S3::Bucket
-  S3UploadLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      Layers: [ arn:aws:lambda:us-east-1:915290536872:layer:S3UploadCustomResource:5 ]
-      CodeUri: local/path/to/assets # This is a local path to a folder of files you want to deploy,
-                                    # either your build or source directory, depending on how your
-                                    # site is configured.
-      Handler: s3-upload-custom-resource.handler # This is fixed and references a file provided by
-                                                 # this project and available in the Lambda layer.
-      Runtime: nodejs12.x
-      Policies:
-      - S3CrudPolicy:
-          BucketName: !Ref WebsiteBucket
-  DeployWebsite:
-    Type: Custom::UploadFilesToS3
-    Properties:
-      ServiceToken: !GetAtt S3UploadLambda.Arn
-      BucketName: !Ref WebsiteBucket
-      ContentVersion: !Ref DeploymentContentVersion
+    WebsiteBucket:
+        Type: AWS::S3::Bucket
+    S3UploadLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            Layers: [arn:aws:lambda:us-east-1:915290536872:layer:S3UploadCustomResource:5]
+            CodeUri:
+                local/path/to/assets # This is a local path to a folder of files you want to deploy,
+                # either your build or source directory, depending on how your
+                # site is configured.
+            Handler:
+                s3-upload-custom-resource.handler # This is fixed and references a file provided by
+                # this project and available in the Lambda layer.
+            Runtime: nodejs12.x
+            Policies:
+                - S3CrudPolicy:
+                      BucketName: !Ref WebsiteBucket
+    DeployWebsite:
+        Type: Custom::UploadFilesToS3
+        Properties:
+            ServiceToken: !GetAtt S3UploadLambda.Arn
+            BucketName: !Ref WebsiteBucket
+            ContentVersion: !Ref DeploymentContentVersion
 ```
 
 ## Sample Deployment Command
@@ -68,11 +70,11 @@ This is not a parameter defined by this project, but comes from [CloudFormation'
 
 The name of the S3 bucket to deploy to. Without an `ObjectPrefix`, it must be empty before it can be attached to an uploader resource and will fill to create if not.
 
-### ObjectPrefix `String` - *Optional*
+### ObjectPrefix `String` - _Optional_
 
 Optional prefix to prepend to all objects uploaded. If provided, multiple upload resources can use the same bucket so long as the prefixes are unique and no objects already exist in the bucket with those prefixes.
 
-### ContentVersion `String` - *Optional*
+### ContentVersion `String` - _Optional_
 
 `ContentVersion` is not strictly required today, but may be in a future version of the layer. It is used to identify the version of the content with the only requirement being that a different version is chosen every time the content changes.
 

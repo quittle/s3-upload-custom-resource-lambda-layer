@@ -3,28 +3,28 @@ os: linux
 language: node_js
 
 node_js:
-  - 10.18.1
+    - 10.18.1
 
 addons:
-  apt:
-    packages:
-    - jq
-    - python3-pip
-    - python3-setuptools
+    apt:
+        packages:
+            - jq
+            - python3-pip
+            - python3-setuptools
 
 env:
-- AWS_DEFAULT_REGION=us-east-1
+    - AWS_DEFAULT_REGION=us-east-1
 
 install:
-- pip3 install awscli --upgrade --user
-- npm install
+    - pip3 install awscli --upgrade --user
+    - npm install
 
 script:
-- npm run build-and-test
+    - npm run build-and-test
 
 deploy:
-  skip_cleanup: true
-  provider: script
-  script: npm run release
-  on:
-    branch: master
+    skip_cleanup: true
+    provider: script
+    script: npm run release
+    on:
+        branch: master

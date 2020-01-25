@@ -1,9 +1,7 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-        "@typescript-eslint"
-    ],
+    "plugins": ["@typescript-eslint"],
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
@@ -17,10 +15,5 @@
             }
         ]
     },
-    "ignorePatterns": [
-        "node_modules/",
-        "dist/",
-        "webpack.config.js",
-        "jest.config.js"
-    ]
+    "ignorePatterns": ["node_modules/", "dist/", "webpack.config.js", "jest.config.js"]
 }
