@@ -85,3 +85,22 @@ This may be a Git commit or the hash of the content being deployed. One of the s
 1. Any contents under the object prefix (or in the bucket if `ObjectPrefix` is not specified) will be deleted when the custom resource managing it is updated or deleted, regardless of whether the resources were managed by the upload resource.
 
 2. CloudFormation changes that switch the bucket being deployed to may fail if the Lambda function backing it does not have permission to deploy to delete objects in the original bucket. You will have to create a new custom resource, with a different name and different backing Lambda.
+
+# Development
+
+To validate locally before pushing, run `AWS_REGION=us-east-1 npm run build-and-test`.
+
+Other targets of interest
+
+-   `build` - Runs the build and generates the lambda layer contents
+-   `unit-test` - Runs the unit test suite
+-   `integration-test` - Runs the integration test suite (requires AWS credentials)
+-   `test` - Runs all tests
+-   `release` - This deploys to the production stack. **Do not run manually.**
+-   `check` - Runs static analysis and tests
+-   `prettier-fix` - Automatically fixes Prettier issues
+-   `lint-fix` - Automatically fixes ESLint issues
+
+## Debugging
+
+If you see `ConfigError: Missing region in config` when running the integration test suite. You need to set the AWS region you are testing against in your environment variables. Running `AWS_REGION=us-east-1 npm run integration-test` should solve the problem.

@@ -8,18 +8,20 @@
     },
     "scripts": {
         "build": "webpack",
-        "test": "jest",
+        "test": "npm run unit-test && npm run integration-test",
+        "unit-test": "jest src",
+        "integration-test": "npm run build && npm run package && npm run integration-test:deploy-layer && npm run integration-test:run",
+        "integration-test:deploy-layer": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer-beta",
+        "integration-test:run": "LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst",
         "package": "scripts/build_lambda_layer_zip",
         "lint": "eslint . --ext .js,.ts",
         "lint-fix": "eslint . --ext .js,.ts --fix",
-        "prettier-check": "prettier --check '**'",
-        "prettier-write": "prettier --write '**'",
-        "check": "npm run lint && npm run prettier-check && npm run test",
+        "prettier": "prettier --check '**'",
+        "prettier-fix": "prettier --write '**'",
+        "check": "npm run lint && npm run prettier && npm run unit-test",
         "deploy": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer",
-        "deploy-beta": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer-beta",
-        "integration-test": "scripts/integration_test s3-upload-custom-resource-lambda-layer-beta",
-        "build-and-test": "npm run build && npm run check && npm run package && npm run deploy-beta && npm run integration-test",
-        "release": "npm run deploy"
+        "build-and-test": "npm run build && npm run check && npm run integration-test",
+        "release": "npm run build && npm run package && npm run deploy"
     },
     "devDependencies": {
         "@types/aws-sdk": "^2.7.0",

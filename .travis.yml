@@ -13,7 +13,8 @@ addons:
             - python3-setuptools
 
 env:
-    - AWS_DEFAULT_REGION=us-east-1
+    # The AWS JS SDK only respects AWS_REGION, not AWS_DEFAULT_REGION- https://github.com/aws/aws-sdk-js/issues/2929
+    - AWS_DEFAULT_REGION=us-east-1 AWS_REGION="${AWS_DEFAULT_REGION}"
 
 install:
     - pip3 install awscli --upgrade --user

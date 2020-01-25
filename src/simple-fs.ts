@@ -19,4 +19,16 @@ export class SimpleFs {
     public readFile(file: string): Buffer {
         return fs.readFileSync(file);
     }
+
+    public writeFile(file: string, contents: string): void {
+        fs.writeFileSync(file, contents);
+    }
+
+    public createFolder(folder: string): void {
+        fs.mkdirSync(folder, { recursive: true });
+    }
+
+    public deleteFolder(root: string): void {
+        fs.rmdirSync(root, { recursive: true });
+    }
 }

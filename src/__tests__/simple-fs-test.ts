@@ -1,7 +1,19 @@
 import { SimpleFs } from "../simple-fs";
+import * as path from "path";
+import * as os from "os";
 
 describe("SimpleFs", () => {
     const simpleFs = new SimpleFs();
+    const tempDir = path.join(os.tmpdir(), "__simple-fs-test-dir__");
+
+    beforeEach(() => {
+        simpleFs.deleteFolder(tempDir);
+        simpleFs.createFolder(tempDir);
+    });
+
+    afterEach(() => {
+        simpleFs.deleteFolder(tempDir);
+    });
 
     describe("readFile", () => {
         test("non-existent file", () => {
@@ -24,6 +36,25 @@ describe("SimpleFs", () => {
 
             // Make sure it's a non-trivial object so we're not just lucky that it read some file
             expect(Object.keys(contents).length).toBeGreaterThan(1);
+        });
+    });
+
+    describe("writeFile", () => {
+        test("writing to directory fails", () => {
+            expect(() => simpleFs.writeFile(tempDir, "anything")).toThrow(
+                `EISDIR: illegal operation on a directory, open '${tempDir}'`
+            );
+        });
+
+        test("writing and overwriting file", () => {
+            const file = path.join(tempDir, "file.txt");
+            const firstContents = "first contents";
+            const secondContents = "second contents";
+
+            simpleFs.writeFile(file, firstContents);
+            expect(simpleFs.readFile(file).toString()).toEqual(firstContents);
+            simpleFs.writeFile(file, secondContents);
+            expect(simpleFs.readFile(file).toString()).toEqual(secondContents);
         });
     });
 
@@ -68,6 +99,61 @@ describe("SimpleFs", () => {
             for (const file of simpleFs.listFiles("src")) {
                 expect(simpleFs.readFile(file)).toBeDefined();
             }
+        });
+    });
+
+    describe("createFolder", () => {
+        test("already is file", () => {
+            const file = path.join(tempDir, "file.txt");
+            simpleFs.writeFile(file, "contents");
+            expect(() => simpleFs.createFolder(file)).toThrow(
+                `EEXIST: file already exists, mkdir '${file}'`
+            );
+        });
+
+        test("already is folder does not throw", () => {
+            const folder = path.join(tempDir, "folder");
+            simpleFs.createFolder(folder);
+            simpleFs.createFolder(folder);
+        });
+
+        test("create nested folder", () => {
+            const folder = path.join(tempDir, "1", "2", "3", "folder");
+            simpleFs.createFolder(folder);
+        });
+    });
+
+    describe("deleteFolder", () => {
+        test("non-existent file doesn't throw", () => {
+            simpleFs.deleteFolder(path.join(tempDir, "non-existent-file.txt"));
+        });
+
+        test("deletes file", () => {
+            const file = path.join(tempDir, "file.txt");
+            const contents = "contents";
+            simpleFs.writeFile(file, contents);
+            expect(simpleFs.readFile(file).toString()).toEqual(contents);
+            simpleFs.deleteFolder(file);
+            expect(() => simpleFs.readFile(file).toString()).toThrow(
+                `ENOENT: no such file or directory, open '${file}`
+            );
+        });
+
+        test("deletes folder and file", () => {
+            const folder = path.join(tempDir, "folder");
+            const file = path.join(folder, "file.txt");
+            const contents = "contents";
+
+            simpleFs.createFolder(folder);
+            simpleFs.writeFile(file, contents);
+            expect(simpleFs.readFile(file).toString()).toEqual(contents);
+            simpleFs.deleteFolder(folder);
+            expect(() => simpleFs.readFile(file).toString()).toThrow(
+                `ENOENT: no such file or directory, open '${file}`
+            );
+            expect(() => simpleFs.listFiles(folder).toString()).toThrow(
+                `ENOENT: no such file or directory, scandir '${folder}`
+            );
         });
     });
 });
