@@ -4,7 +4,11 @@ import { SimpleFs } from "./simple-fs";
 import { ResponseStatus } from "./cloudformation-types";
 
 export class UpdateHandler extends EventHandler {
-    protected async handleEvent(parameters: RequestParameters, simpleS3: SimpleS3, simpleFs: SimpleFs): Promise<ResultType> {
+    protected async handleEvent(
+        parameters: RequestParameters,
+        simpleS3: SimpleS3,
+        simpleFs: SimpleFs
+    ): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
 
         let currentKeys;
@@ -13,7 +17,7 @@ export class UpdateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in bucket. (${e})`,
+                reason: `Unable to list objects in bucket. (${e})`
             };
         }
 
@@ -22,17 +26,19 @@ export class UpdateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to delete objects in ${bucketName}. (${e})`,
+                reason: `Unable to delete objects in ${bucketName}. (${e})`
             };
         }
-        
+
         const files: string[] = simpleFs.listFiles(".");
 
         try {
-            await Promise.all(files.map(async file => {
-                const contents = simpleFs.readFile(file);
-                return simpleS3.uploadFile(bucketName, objectPrefix, file, contents);
-            }));
+            await Promise.all(
+                files.map(async file => {
+                    const contents = simpleFs.readFile(file);
+                    return simpleS3.uploadFile(bucketName, objectPrefix, file, contents);
+                })
+            );
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
@@ -41,7 +47,7 @@ export class UpdateHandler extends EventHandler {
         }
 
         return {
-            status: ResponseStatus.SUCCESS,
+            status: ResponseStatus.SUCCESS
         };
     }
 }

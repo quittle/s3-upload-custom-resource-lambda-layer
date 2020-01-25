@@ -2,7 +2,12 @@ import * as https from "https";
 import * as url from "url";
 
 import { CustomParameters } from "./resources";
-import { ResponseStatus, RequestType, CloudformationEvent, CloudformationContext } from "./cloudformation-types";
+import {
+    ResponseStatus,
+    RequestType,
+    CloudformationEvent,
+    CloudformationContext
+} from "./cloudformation-types";
 import { ResultCallback, ResultType } from "./handler";
 import { CreateHandler } from "./handle-create";
 import { DeleteHandler } from "./handle-delete";
@@ -28,7 +33,13 @@ function computePhysicalId(event: CloudformationEvent): string {
 }
 
 // Send response to the pre-signed S3 URL
-async function sendResponse(event: CloudformationEvent, context: CloudformationContext, responseStatus: ResponseStatus, responseReason?: string, responseData?: object): Promise<void> {
+async function sendResponse(
+    event: CloudformationEvent,
+    context: CloudformationContext,
+    responseStatus: ResponseStatus,
+    responseReason?: string,
+    responseData?: object
+): Promise<void> {
     const responseBody = JSON.stringify({
         Status: responseStatus,
         Reason: responseReason,
@@ -76,7 +87,10 @@ async function sendResponse(event: CloudformationEvent, context: CloudformationC
     });
 }
 
-exports.handler = async function(event: CloudformationEvent, context: CloudformationContext): Promise<void> {
+exports.handler = async function(
+    event: CloudformationEvent,
+    context: CloudformationContext
+): Promise<void> {
     console.log("REQUEST RECEIVED:\n" + JSON.stringify(event));
 
     const callback: ResultCallback = async (result: ResultType) => {
@@ -88,7 +102,7 @@ exports.handler = async function(event: CloudformationEvent, context: Cloudforma
     } catch (errorMessage) {
         return await callback({
             status: ResponseStatus.FAILED,
-            reason: errorMessage,
+            reason: errorMessage
         });
     }
 
@@ -102,7 +116,7 @@ exports.handler = async function(event: CloudformationEvent, context: Cloudforma
         default:
             return await callback({
                 status: ResponseStatus.FAILED,
-                reason: `Unknown request type ${event.RequestType}`,
+                reason: `Unknown request type ${event.RequestType}`
             });
     }
 };

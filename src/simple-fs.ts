@@ -3,7 +3,7 @@ import * as path from "path";
 
 export class SimpleFs {
     public listFiles(root: string): string[] {
-        const dirs = fs.readdirSync(root, {withFileTypes: true});
+        const dirs = fs.readdirSync(root, { withFileTypes: true });
         let ret: string[] = [];
         for (const f of dirs) {
             const filePath = path.join(root, f.name);

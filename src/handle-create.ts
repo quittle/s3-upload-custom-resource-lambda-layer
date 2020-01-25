@@ -4,7 +4,11 @@ import { SimpleS3 } from "./simple-s3";
 import { SimpleFs } from "./simple-fs";
 
 export class CreateHandler extends EventHandler {
-    protected async handleEvent(parameters: RequestParameters, simpleS3: SimpleS3, simpleFs: SimpleFs): Promise<ResultType> {
+    protected async handleEvent(
+        parameters: RequestParameters,
+        simpleS3: SimpleS3,
+        simpleFs: SimpleFs
+    ): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
         let isBucketEmpty;
         try {
@@ -12,24 +16,26 @@ export class CreateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in bucket. (${e})`,
+                reason: `Unable to list objects in bucket. (${e})`
             };
         }
 
         if (!isBucketEmpty) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: "Bucket must be empty",
+                reason: "Bucket must be empty"
             };
         }
 
         const files: string[] = simpleFs.listFiles(".");
 
         try {
-            await Promise.all(files.map(file => {
-                const contents = simpleFs.readFile(file);
-                return simpleS3.uploadFile(bucketName, objectPrefix, file, contents);
-            }));
+            await Promise.all(
+                files.map(file => {
+                    const contents = simpleFs.readFile(file);
+                    return simpleS3.uploadFile(bucketName, objectPrefix, file, contents);
+                })
+            );
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
@@ -38,7 +44,7 @@ export class CreateHandler extends EventHandler {
         }
 
         return {
-            status: ResponseStatus.SUCCESS,
+            status: ResponseStatus.SUCCESS
         };
     }
 }

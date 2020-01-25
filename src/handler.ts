@@ -25,7 +25,7 @@ export abstract class EventHandler {
         if (!bucketName) {
             await callback({
                 status: ResponseStatus.FAILED,
-                reason: `${CustomParameters.BUCKET_NAME} must be specified.`,
+                reason: `${CustomParameters.BUCKET_NAME} must be specified.`
             });
             return;
         }
@@ -33,7 +33,7 @@ export abstract class EventHandler {
         const parameters: RequestParameters = {
             physicalId,
             bucketName,
-            objectPrefix,
+            objectPrefix
         };
 
         let result;
@@ -42,12 +42,16 @@ export abstract class EventHandler {
         } catch (e) {
             result = {
                 status: ResponseStatus.FAILED,
-                reason: `Failure when handling event. (${e})`,
+                reason: `Failure when handling event. (${e})`
             };
         }
 
         await callback(result);
     }
 
-    protected abstract async handleEvent(parameters: RequestParameters, simpleS3: SimpleS3, simpleFs: SimpleFs): Promise<ResultType>;
+    protected abstract async handleEvent(
+        parameters: RequestParameters,
+        simpleS3: SimpleS3,
+        simpleFs: SimpleFs
+    ): Promise<ResultType>;
 }

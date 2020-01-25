@@ -1,12 +1,12 @@
 export enum ResponseStatus {
     SUCCESS = "SUCCESS",
-    FAILED = "FAILED",
+    FAILED = "FAILED"
 }
 
 export enum RequestType {
     CREATE = "Create",
     UPDATE = "Update",
-    DELETE = "Delete",
+    DELETE = "Delete"
 }
 
 interface StringObject {

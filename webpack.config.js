@@ -1,4 +1,5 @@
 const path = require('path');
+const PrettierPlugin = require("prettier-webpack-plugin");
 
 module.exports = {
     entry: './src/index.ts',
@@ -17,6 +18,12 @@ module.exports = {
             },
         ],
     },
+    plugins: [
+        new PrettierPlugin({
+            tabWidth: 4,
+            printWidth: 100,
+        }),
+    ],
     resolve: {
         extensions: [".ts", ".js"],
     },

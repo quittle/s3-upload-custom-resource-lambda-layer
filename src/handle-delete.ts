@@ -4,7 +4,11 @@ import { SimpleFs } from "./simple-fs";
 import { ResponseStatus } from "./cloudformation-types";
 
 export class DeleteHandler extends EventHandler {
-    protected async handleEvent(parameters: RequestParameters, simpleS3: SimpleS3, _simpleFs: SimpleFs): Promise<ResultType> {
+    protected async handleEvent(
+        parameters: RequestParameters,
+        simpleS3: SimpleS3,
+        _simpleFs: SimpleFs
+    ): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
 
         let keys;
@@ -13,7 +17,7 @@ export class DeleteHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in ${bucketName}. (${e})`,
+                reason: `Unable to list objects in ${bucketName}. (${e})`
             };
         }
         try {
@@ -21,12 +25,12 @@ export class DeleteHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to delete objects in ${bucketName}. (${e})`,
+                reason: `Unable to delete objects in ${bucketName}. (${e})`
             };
         }
 
         return {
-            status: ResponseStatus.SUCCESS,
+            status: ResponseStatus.SUCCESS
         };
     }
 }
