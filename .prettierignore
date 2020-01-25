@@ -1,3 +1,6 @@
+# Ignore the dist folder as it's generated
+/dist/*
+
 # Intentionally not YAML to allow replacing the CodeUri
 /tst/example-project/cloudformation.yml
 

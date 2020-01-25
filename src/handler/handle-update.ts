@@ -1,7 +1,7 @@
 import { EventHandler, RequestParameters, ResultType } from "./handler";
-import { SimpleS3 } from "./simple-s3";
-import { SimpleFs } from "./simple-fs";
-import { ResponseStatus } from "./cloudformation-types";
+import { SimpleS3 } from "../simple-s3";
+import { SimpleFs } from "../simple-fs";
+import { ResponseStatus } from "../cloudformation-types";
 
 export class UpdateHandler extends EventHandler {
     protected async handleEvent(
