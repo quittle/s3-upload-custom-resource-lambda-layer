@@ -130,8 +130,6 @@ describe("all tests", () => {
     const ASYNC_TIMEOUT_MS = 60_000;
     const TEST_STACK_NAME = "s3-upload-custom-resource-lambda-layer-test-stack";
     const exampleRoot = __dirname;
-    const tempDir = path.join(os.tmpdir(), "__integration-test-tmp-dir__");
-    const generatedCloudFormationTemplateFile = path.join(tempDir, "example-cloudformation.yml");
     const testDataDir = path.join(exampleRoot, "test-data");
 
     const cloudFormation = new CloudFormation();
@@ -139,9 +137,13 @@ describe("all tests", () => {
     const simpleFs = new SimpleFs();
 
     let layerArn: string;
+    let tempDir: string;
+    let generatedCloudFormationTemplateFile: string;
 
     beforeEach(async () => {
         layerArn = (await describeLayerStack(cloudFormation, LAYER_STACK_NAME)).layerArn;
+        tempDir = path.join(os.tmpdir(), "__integration-test-tmp-dir__" + Math.random());
+        generatedCloudFormationTemplateFile = path.join(tempDir, "example-cloudformation.yml");
         simpleFs.deleteFolder(tempDir);
         simpleFs.createFolder(tempDir);
         await deleteStackIfExists(cloudFormation, TEST_STACK_NAME);

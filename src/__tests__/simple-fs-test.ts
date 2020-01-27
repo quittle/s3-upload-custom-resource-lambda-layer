@@ -4,9 +4,10 @@ import * as os from "os";
 
 describe("SimpleFs", () => {
     const simpleFs = new SimpleFs();
-    const tempDir = path.join(os.tmpdir(), "__simple-fs-test-dir__");
+    let tempDir: string;
 
     beforeEach(() => {
+        tempDir = path.join(os.tmpdir(), "__simple-fs-test-dir__" + Math.random());
         simpleFs.deleteFolder(tempDir);
         simpleFs.createFolder(tempDir);
     });
