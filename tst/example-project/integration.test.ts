@@ -4,6 +4,7 @@ import { SimpleFs } from "../../src/simple-fs";
 import * as path from "path";
 import * as childProcess from "child_process";
 import * as os from "os";
+import { autoPaginate } from "../../src/aws-helper";
 
 const LAYER_STACK_NAME = process.env.LAYER_STACK_NAME;
 
@@ -89,46 +90,51 @@ async function describeLayerStack(
     };
 }
 
-async function packageAndDeployExampleProject(
-    cloudFormation: CloudFormation,
-    simpleFs: SimpleFs,
-    stackName: string,
-    layerArn: string,
-    exampleRoot: string,
-    sourceRoot: string,
-    outputFilePath: string
-): Promise<TestStackOutputs> {
-    const cloudFormationTemplate = path.join(exampleRoot, "cloudformation.yml");
-    const contents = simpleFs
-        .readFile(cloudFormationTemplate)
+async function packageAndDeployExampleProject(args: {
+    cloudFormation: CloudFormation;
+    simpleFs: SimpleFs;
+    stackName: string;
+    layerArn: string;
+    cloudformationBase: string;
+    sourceRoot: string;
+    outputFilePath: string;
+    extraCloudFormationParameters?: StringMap;
+}): Promise<TestStackOutputs> {
+    const contents = args.simpleFs
+        .readFile(args.cloudformationBase)
         .toString()
-        .replace("!!!source-root!!!", sourceRoot);
-    simpleFs.writeFile(outputFilePath, contents);
+        .replace("!!!source-root!!!", args.sourceRoot);
+    args.simpleFs.writeFile(args.outputFilePath, contents);
 
     childProcess.execSync(`aws cloudformation package \
-            --template-file "${outputFilePath}" \
+            --template-file "${args.outputFilePath}" \
             --s3-bucket sam-915290536872 \
-            --output-template-file "${outputFilePath}" \
+            --output-template-file "${args.outputFilePath}" \
             --use-json`);
 
     const generatedCloudFormationContents = JSON.parse(
-        simpleFs.readFile(outputFilePath).toString()
+        args.simpleFs.readFile(args.outputFilePath).toString()
     );
     const codeUri = generatedCloudFormationContents.Resources.TestUploaderLambda.Properties.CodeUri;
-
+    const extraParameters = args.extraCloudFormationParameters
+        ? Object.entries(args.extraCloudFormationParameters)
+              .map(([key, value]) => `"${key}=${value}"`)
+              .join(" ")
+        : "";
     childProcess.execSync(`aws cloudformation deploy \
-            --template-file "${outputFilePath}" \
-            --stack-name "${stackName}" \
+            --template-file "${args.outputFilePath}" \
+            --stack-name "${args.stackName}" \
             --capabilities CAPABILITY_IAM \
-            --parameter-overrides "UploadedContentVersion=${codeUri}" "S3UploadLambdaLayerArn=${layerArn}" \
+            --parameter-overrides "UploadedContentVersion=${codeUri}" "S3UploadLambdaLayerArn=${args.layerArn}" ${extraParameters} \
             --no-fail-on-empty-changeset`);
 
-    return await describeTestStack(cloudFormation, stackName);
+    return await describeTestStack(args.cloudFormation, args.stackName);
 }
 
 describe("all tests", () => {
-    const ASYNC_TIMEOUT_MS = 60_000;
+    const ASYNC_TIMEOUT_MS = 120_000;
     const TEST_STACK_NAME = "s3-upload-custom-resource-lambda-layer-test-stack";
+    const TEST_BUCKET_STACK_NAME = "s3-upload-custom-resource-lambda-layer-bucket-test-stack";
     const exampleRoot = __dirname;
     const testDataDir = path.join(exampleRoot, "test-data");
 
@@ -146,66 +152,133 @@ describe("all tests", () => {
         generatedCloudFormationTemplateFile = path.join(tempDir, "example-cloudformation.yml");
         simpleFs.deleteFolder(tempDir);
         simpleFs.createFolder(tempDir);
-        await deleteStackIfExists(cloudFormation, TEST_STACK_NAME);
+        await Promise.all([
+            deleteStackIfExists(cloudFormation, TEST_BUCKET_STACK_NAME),
+            deleteStackIfExists(cloudFormation, TEST_STACK_NAME)
+        ]);
     }, ASYNC_TIMEOUT_MS);
 
     afterEach(async () => {
         simpleFs.deleteFolder(tempDir);
-        await deleteStackIfExists(cloudFormation, TEST_STACK_NAME);
+        await Promise.all([
+            deleteStackIfExists(cloudFormation, TEST_BUCKET_STACK_NAME),
+            deleteStackIfExists(cloudFormation, TEST_STACK_NAME)
+        ]);
     }, ASYNC_TIMEOUT_MS);
 
     test(
         "Create, Update, Delete Lifecycle",
         async () => {
-            const { rootBucketName, fooBarBucketName } = await packageAndDeployExampleProject(
+            const template = path.join(exampleRoot, "cloudformation.yml");
+            const { rootBucketName, fooBarBucketName } = await packageAndDeployExampleProject({
                 cloudFormation,
                 simpleFs,
-                TEST_STACK_NAME,
+                stackName: TEST_STACK_NAME,
                 layerArn,
-                exampleRoot,
-                path.join(exampleRoot, "src-1"),
-                generatedCloudFormationTemplateFile
-            );
+                cloudformationBase: template,
+                sourceRoot: path.join(exampleRoot, "src-1"),
+                outputFilePath: generatedCloudFormationTemplateFile
+            });
 
             console.debug(
                 `Cloudformation deployed successfully. Buckets for test => Root Bucket: ${rootBucketName}, FooBar Bucket: ${fooBarBucketName}`
             );
 
-            await compareBucketContents(
-                s3,
-                rootBucketName,
-                path.join(testDataDir, "root-contents-1.txt")
-            );
-            await compareBucketContents(
-                s3,
-                fooBarBucketName,
-                path.join(testDataDir, "foo-bar-contents-1.txt")
-            );
+            await Promise.all([
+                compareBucketContents(
+                    s3,
+                    rootBucketName,
+                    path.join(testDataDir, "root-contents-1.txt")
+                ),
+                compareBucketContents(
+                    s3,
+                    fooBarBucketName,
+                    path.join(testDataDir, "foo-bar-contents-1.txt")
+                )
+            ]);
 
-            console.debug("Contents are as expected for src-1");
-
-            await packageAndDeployExampleProject(
+            await packageAndDeployExampleProject({
                 cloudFormation,
                 simpleFs,
-                TEST_STACK_NAME,
+                stackName: TEST_STACK_NAME,
                 layerArn,
-                exampleRoot,
-                path.join(exampleRoot, "src-2"),
-                generatedCloudFormationTemplateFile
-            );
+                cloudformationBase: template,
+                sourceRoot: path.join(exampleRoot, "src-2"),
+                outputFilePath: generatedCloudFormationTemplateFile
+            });
 
-            await compareBucketContents(
-                s3,
-                rootBucketName,
-                path.join(testDataDir, "root-contents-2.txt")
-            );
-            await compareBucketContents(
-                s3,
-                fooBarBucketName,
-                path.join(testDataDir, "foo-bar-contents-2.txt")
-            );
+            await Promise.all([
+                compareBucketContents(
+                    s3,
+                    rootBucketName,
+                    path.join(testDataDir, "root-contents-2.txt")
+                ),
+                compareBucketContents(
+                    s3,
+                    fooBarBucketName,
+                    path.join(testDataDir, "foo-bar-contents-2.txt")
+                )
+            ]);
+        },
+        ASYNC_TIMEOUT_MS
+    );
 
-            console.debug("Contents are as expected for src-2");
+    test(
+        "Cannot create with folder already containing contents",
+        async () => {
+            const { rootBucketName } = await packageAndDeployExampleProject({
+                cloudFormation,
+                simpleFs,
+                stackName: TEST_STACK_NAME,
+                layerArn,
+                cloudformationBase: path.join(exampleRoot, "cloudformation.yml"),
+                sourceRoot: path.join(exampleRoot, "src-1"),
+                outputFilePath: generatedCloudFormationTemplateFile
+            });
+
+            await expect(
+                packageAndDeployExampleProject({
+                    cloudFormation,
+                    simpleFs,
+                    stackName: TEST_BUCKET_STACK_NAME,
+                    layerArn,
+                    cloudformationBase: path.join(exampleRoot, "bucket-cloudformation.yml"),
+                    sourceRoot: path.join(exampleRoot, "src-1"),
+                    outputFilePath: generatedCloudFormationTemplateFile,
+                    extraCloudFormationParameters: { BucketName: rootBucketName, ObjectPrefix: "" }
+                })
+            ).rejects.toThrow("Failed to create/update the stack");
+
+            /* eslint-disable @typescript-eslint/unbound-method */
+            const stacks: CloudFormation.ListStacksOutput[] = await autoPaginate<
+                CloudFormation,
+                CloudFormation.ListStacksInput,
+                CloudFormation.ListStacksOutput
+            >(cloudFormation, cloudFormation.listStacks, {
+                StackStatusFilter: ["DELETE_COMPLETE"]
+            });
+            /* eslint-enable */
+
+            const mostRecentStackId = stacks
+                .reduce(
+                    (acc: CloudFormation.StackSummary[], response) =>
+                        acc.concat(response.StackSummaries || []),
+                    []
+                )
+                .map(summary => ({
+                    id: summary.StackId,
+                    name: summary.StackName,
+                    time: summary.DeletionTime!.getMilliseconds() // eslint-disable-line @typescript-eslint/no-non-null-assertion
+                }))
+                .filter(summary => summary.name === TEST_BUCKET_STACK_NAME)
+                .sort((a, b) => b.time - a.time)[0].id;
+            const events = await cloudFormation
+                .describeStackEvents({ StackName: mostRecentStackId })
+                .promise();
+            const reason = events.StackEvents?.find(
+                event => event.ResourceStatus === "CREATE_FAILED"
+            )?.ResourceStatusReason;
+            expect(reason).toEqual("Failed to create resource. Bucket must be empty");
         },
         ASYNC_TIMEOUT_MS
     );

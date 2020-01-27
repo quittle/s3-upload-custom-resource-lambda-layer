@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+    S3UploadLambdaLayerArn:
+        Type: String
+        Description: The ARN of the Lambda layer to test
+    UploadedContentVersion:
+        Type: String
+        Description: The CodeUri of the Lambda in the generated Cloudformation template built with `aws cloudformation package`.
+    BucketName:
+        Type: String
+        Description: Name of the bucket to upload to
+    ObjectPrefix:
+        Type: String
+        Description: Optional - The object prefix
+Conditions:
+    HasObjectPrefix: !Not [!Equals ["", !Ref ObjectPrefix]]
+Resources:
+    TestUploaderLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            Layers: [!Ref S3UploadLambdaLayerArn]
+            CodeUri: "!!!source-root!!!"
+            Handler: s3-upload-custom-resource.handler
+            Runtime: nodejs12.x
+            Timeout: 30
+            Policies:
+                - S3CrudPolicy:
+                      BucketName: !Ref BucketName
+    UploadToBucket:
+        Type: Custom::UploadFilesToS3
+        Properties:
+            ServiceToken: !GetAtt TestUploaderLambda.Arn
+            BucketName: !Ref BucketName
+            ContentVersion: !Ref UploadedContentVersion
+            ObjectPrefix: !If [HasObjectPrefix, !Ref ObjectPrefix, !Ref "AWS::NoValue"]

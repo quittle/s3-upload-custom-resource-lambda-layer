@@ -1,8 +1,5 @@
 import * as S3 from "aws-sdk/clients/s3";
-
-function notEmpty<T>(value: T | null | undefined): value is T {
-    return value !== null && value !== undefined;
-}
+import { autoPaginate } from "./aws-helper";
 
 export class SimpleS3 {
     private readonly s3: S3 = new S3();
@@ -15,28 +12,21 @@ export class SimpleS3 {
         bucketName: string,
         objectPrefix: string | undefined
     ): Promise<string[]> {
-        let ret: string[] = [];
-        let continuationToken: string | undefined;
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            const params: S3.ListObjectsV2Request = {
+        const response = await autoPaginate<S3, S3.ListObjectsV2Request, S3.ListObjectsV2Output>(
+            this.s3,
+            // eslint-disable-next-line @typescript-eslint/unbound-method
+            this.s3.listObjectsV2,
+            {
                 Bucket: bucketName,
                 Prefix: objectPrefix
-            };
-            if (continuationToken) {
-                params.ContinuationToken = continuationToken;
             }
-            const response = await this.s3.listObjectsV2(params).promise();
-            if (response.KeyCount && response.KeyCount > 0) {
-                ret = ret.concat((response.Contents ?? []).map(obj => obj.Key).filter(notEmpty));
-            }
-            if (response.IsTruncated) {
-                continuationToken = response.NextContinuationToken;
-            } else {
-                break;
-            }
-        }
-        return ret;
+        );
+        const keys = response.reduce(
+            (acc: string[], page) =>
+                acc.concat(page.Contents?.map(object => object?.Key) as string[]),
+            []
+        );
+        return keys;
     }
 
     public async isBucketEmpty(
