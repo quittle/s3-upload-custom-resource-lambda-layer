@@ -53,7 +53,8 @@ export class SimpleS3 {
         bucketName: string,
         objectPrefix: string | undefined,
         localFilePath: string,
-        localFileContents: Buffer
+        localFileContents: Buffer,
+        extraParams?: S3.PutObjectRequest
     ): Promise<void> {
         const key = (objectPrefix || "") + localFilePath;
 
@@ -61,7 +62,8 @@ export class SimpleS3 {
             .upload({
                 Bucket: bucketName,
                 Key: key,
-                Body: localFileContents
+                Body: localFileContents,
+                ...extraParams
             })
             .promise();
     }

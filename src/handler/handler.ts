@@ -1,7 +1,8 @@
 import { CloudformationEvent, ResponseStatus } from "../cloudformation-types";
 import { SimpleS3 } from "../simple-s3";
-import { CustomParameters } from "../resources";
+import { CustomParameters, S3_UPLOAD_CONFIG_FILE } from "../resources";
 import { SimpleFs } from "../simple-fs";
+import { S3UploadConfig } from "../s3-upload-config";
 
 export interface ResultType {
     status: ResponseStatus;
@@ -36,9 +37,19 @@ export abstract class EventHandler {
             objectPrefix
         };
 
+        const simpleFs = new SimpleFs();
+
+        let s3UploadConfig;
+        try {
+            const s3UploadConfigString = simpleFs.readFile(S3_UPLOAD_CONFIG_FILE).toString();
+            s3UploadConfig = new S3UploadConfig(s3UploadConfigString);
+        } catch (e) {
+            console.info(`Unable to read ${S3_UPLOAD_CONFIG_FILE}: ${e}`);
+        }
+
         let result;
         try {
-            result = await this.handleEvent(parameters, new SimpleS3(), new SimpleFs());
+            result = await this.handleEvent(parameters, new SimpleS3(), simpleFs, s3UploadConfig);
         } catch (e) {
             result = {
                 status: ResponseStatus.FAILED,
@@ -52,6 +63,7 @@ export abstract class EventHandler {
     protected abstract async handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,
-        simpleFs: SimpleFs
+        simpleFs: SimpleFs,
+        s3UploadConfig?: S3UploadConfig
     ): Promise<ResultType>;
 }

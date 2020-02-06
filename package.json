@@ -25,7 +25,9 @@
     },
     "devDependencies": {
         "@types/aws-sdk": "^2.7.0",
+        "@types/deepmerge": "^2.2.0",
         "@types/jest": "^25.1.2",
+        "@types/minimatch": "^3.0.3",
         "@types/node": "^13.7.0",
         "@typescript-eslint/eslint-plugin": "^2.19.0",
         "@typescript-eslint/parser": "^2.19.0",
@@ -39,6 +41,8 @@
         "webpack-cli": "^3.3.10"
     },
     "dependencies": {
-        "aws-sdk": "^2.612.0"
+        "aws-sdk": "^2.612.0",
+        "deepmerge": "^4.2.2",
+        "minimatch": "^3.0.4"
     }
 }

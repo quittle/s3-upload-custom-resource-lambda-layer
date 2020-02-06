@@ -1,0 +1,18 @@
+{
+    "*.html": {
+        "contentType": "text/html"
+    },
+    "**/*.txt": {
+        "metadata": {
+            "key": "value",
+            "to-be-overridden": "initial"
+        },
+        "contentType": "text/plain"
+    },
+    "folder/file.txt": {
+        "metadata": {
+            "made-up-key": "made-up-value",
+            "to-be-overridden": "overridden"
+        }
+    }
+}

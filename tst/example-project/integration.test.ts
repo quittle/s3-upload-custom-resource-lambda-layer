@@ -28,12 +28,30 @@ async function compareBucketContents(
     bucketName: string,
     expectedContentsFile: string
 ): Promise<void> {
+    type ObjectDescription = {
+        Key: string;
+        Size?: number;
+        ETag?: string;
+        Metadata?: StringMap;
+        ContentType?: string;
+    };
     const response = await s3.listObjectsV2({ Bucket: bucketName }).promise();
-    const simpleResponse = response.Contents?.map(c => ({
-        Key: c.Key,
-        Size: c.Size,
-        ETag: c.ETag
-    }));
+    const simpleResponse: ObjectDescription[] =
+        response.Contents?.map(c => ({
+            Key: c.Key as string,
+            Size: c.Size,
+            ETag: c.ETag
+        })) ?? [];
+
+    await Promise.all(
+        simpleResponse.map(async response => {
+            const description = await s3
+                .headObject({ Bucket: bucketName, Key: response.Key })
+                .promise();
+            response.Metadata = description.Metadata;
+            response.ContentType = description.ContentType;
+        })
+    );
     const expectedResponse = new SimpleFs().readFile(expectedContentsFile).toString();
     expect(simpleResponse).toStrictEqual(JSON.parse(expectedResponse));
 }

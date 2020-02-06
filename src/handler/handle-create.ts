@@ -2,12 +2,15 @@ import { EventHandler, RequestParameters, ResultType } from "./handler";
 import { ResponseStatus } from "../cloudformation-types";
 import { SimpleS3 } from "../simple-s3";
 import { SimpleFs } from "../simple-fs";
+import { S3UploadConfig } from "../s3-upload-config";
+import { S3_UPLOAD_CONFIG_FILE } from "../resources";
 
 export class CreateHandler extends EventHandler {
     protected async handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,
-        simpleFs: SimpleFs
+        simpleFs: SimpleFs,
+        s3UploadFile?: S3UploadConfig
     ): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
         let isBucketEmpty;
@@ -31,10 +34,19 @@ export class CreateHandler extends EventHandler {
 
         try {
             await Promise.all(
-                files.map(file => {
-                    const contents = simpleFs.readFile(file);
-                    return simpleS3.uploadFile(bucketName, objectPrefix, file, contents);
-                })
+                files
+                    .filter(file => file !== S3_UPLOAD_CONFIG_FILE)
+                    .map(file => {
+                        const contents = simpleFs.readFile(file);
+                        const extraParams = s3UploadFile?.getS3ParamsForKey(file);
+                        return simpleS3.uploadFile(
+                            bucketName,
+                            objectPrefix,
+                            file,
+                            contents,
+                            extraParams
+                        );
+                    })
             );
         } catch (e) {
             return {
