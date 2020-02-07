@@ -13,6 +13,7 @@ interface S3ObjectConfig {
         [key: string]: string;
     };
     contentType?: string;
+    contentDisposition?: string;
 }
 
 /** Internal representation of the parsed configuration */
@@ -57,6 +58,9 @@ class S3UploadConfig {
         }
         if (mergedConfig.contentType) {
             putObjectRequest.ContentType = mergedConfig.contentType;
+        }
+        if (mergedConfig.contentDisposition) {
+            putObjectRequest.ContentDisposition = mergedConfig.contentDisposition;
         }
         return putObjectRequest;
     }

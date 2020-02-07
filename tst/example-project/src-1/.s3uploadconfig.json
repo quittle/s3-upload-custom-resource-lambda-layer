@@ -13,6 +13,7 @@
         "metadata": {
             "made-up-key": "made-up-value",
             "to-be-overridden": "overridden"
-        }
+        },
+        "contentDisposition": "attachment"
     }
 }

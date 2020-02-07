@@ -34,6 +34,7 @@ async function compareBucketContents(
         ETag?: string;
         Metadata?: StringMap;
         ContentType?: string;
+        ContentDisposition?: string;
     };
     const response = await s3.listObjectsV2({ Bucket: bucketName }).promise();
     const simpleResponse: ObjectDescription[] =
@@ -50,6 +51,10 @@ async function compareBucketContents(
                 .promise();
             response.Metadata = description.Metadata;
             response.ContentType = description.ContentType;
+
+            if (typeof description.ContentDisposition !== "undefined") {
+                response.ContentDisposition = description.ContentDisposition;
+            }
         })
     );
     const expectedResponse = new SimpleFs().readFile(expectedContentsFile).toString();

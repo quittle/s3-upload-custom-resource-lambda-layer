@@ -18,7 +18,8 @@
       "key": "value",
       "to-be-overridden": "overridden"
     },
-    "ContentType": "text/plain"
+    "ContentType": "text/plain",
+    "ContentDisposition": "attachment"
   },
   {
     "Key": "foo/file.txt",
@@ -39,6 +40,7 @@
       "key": "value",
       "to-be-overridden": "overridden"
     },
-    "ContentType": "text/plain"
+    "ContentType": "text/plain",
+    "ContentDisposition": "attachment"
   }
 ]

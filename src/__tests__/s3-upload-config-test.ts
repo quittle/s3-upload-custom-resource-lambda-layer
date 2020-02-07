@@ -32,9 +32,13 @@ describe("S3UploadConfig", () => {
             newS3UploadConfig({ file1: {}, file2: {}, file3: {} });
             newS3UploadConfig({ file: { metadata: {} } });
             newS3UploadConfig({ file: { contentType: {} } });
-            newS3UploadConfig({ file: { metadata: {}, contentType: "" } });
-            newS3UploadConfig({ file: { metadata: { key: "value" }, contentType: "" } });
-            newS3UploadConfig({ file: { metadata: null, contentType: null } });
+            newS3UploadConfig({ file: { metadata: {}, contentType: "", contentDisposition: "" } });
+            newS3UploadConfig({
+                file: { metadata: { key: "value" }, contentType: "", contentDisposition: "" }
+            });
+            newS3UploadConfig({
+                file: { metadata: null, contentType: null, contentDisposition: null }
+            });
             newS3UploadConfig({ file: { unknownKey: "unknownValue" } });
         });
 
@@ -48,7 +52,8 @@ describe("S3UploadConfig", () => {
                     contentType: "text/plain"
                 },
                 "src/**/*.png": {
-                    contentType: "image/png"
+                    contentType: "image/png",
+                    contentDisposition: 'attachment; filename="download.png"'
                 }
             });
         });
@@ -73,6 +78,7 @@ describe("S3UploadConfig", () => {
                             key: "value"
                         },
                         contentType: "text/plain",
+                        contentDisposition: "inline; filename=other-name.txt",
                         randomKey: "value"
                     }
                 }).getS3ParamsForKey("file.txt")
@@ -80,7 +86,8 @@ describe("S3UploadConfig", () => {
                 Metadata: {
                     key: "value"
                 },
-                ContentType: "text/plain"
+                ContentType: "text/plain",
+                ContentDisposition: "inline; filename=other-name.txt"
             });
         });
 

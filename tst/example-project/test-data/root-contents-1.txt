@@ -18,6 +18,7 @@
       "key": "value",
       "to-be-overridden": "overridden"
     },
-    "ContentType": "text/plain"
+    "ContentType": "text/plain",
+    "ContentDisposition": "attachment"
   }
 ]
