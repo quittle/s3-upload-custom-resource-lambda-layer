@@ -11,7 +11,7 @@
         "test": "npm run unit-test && npm run integration-test",
         "unit-test": "jest src",
         "integration-test": "npm run build && npm run package && npm run integration-test:deploy-layer && npm run integration-test:run",
-        "integration-test:deploy-layer": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer-beta",
+        "integration-test:deploy-layer": "scripts/deploy_lambda_layer S3UploadCustomResourceBeta s3-upload-custom-resource-lambda-layer-beta",
         "integration-test:run": "LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst",
         "package": "scripts/build_lambda_layer_zip",
         "lint": "eslint . --ext .js,.ts",
@@ -19,7 +19,7 @@
         "prettier": "prettier --check '**'",
         "prettier-fix": "prettier --write '**'",
         "check": "npm run lint && npm run prettier && npm run unit-test",
-        "deploy": "scripts/deploy_lambda_layer s3-upload-custom-resource-lambda-layer",
+        "deploy": "scripts/deploy_lambda_layer S3UploadCustomResource s3-upload-custom-resource-lambda-layer",
         "build-and-test": "npm run build && npm run check && npm run integration-test",
         "release": "npm run build && npm run package && npm run deploy"
     },

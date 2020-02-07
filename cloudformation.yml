@@ -1,10 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
+Parameters:
+    LayerName:
+        Type: String
+        Description: The name of the Lambda Layer.
 Resources:
     S3UploadCustomResourceLayer:
         Type: AWS::Serverless::LayerVersion
         Properties:
-            LayerName: S3UploadCustomResource
+            LayerName: !Ref LayerName
             CompatibleRuntimes: [nodejs12.x]
             ContentUri: dist/layer.zip
             LicenseInfo: Apache-2.0
