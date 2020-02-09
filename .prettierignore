@@ -7,6 +7,10 @@
 # Shell scripts aren't supported
 /scripts/*
 
+# Explicitly invalid file
+/tst/example-project/invalid-s3uploadconfig-src/.s3uploadconfig.json
+
+# Unsupported types
 *.txt
 .gitignore
 .prettierignore

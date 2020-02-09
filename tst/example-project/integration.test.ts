@@ -154,6 +154,66 @@ async function packageAndDeployExampleProject(args: {
     return await describeTestStack(args.cloudFormation, args.stackName);
 }
 
+async function createStackAndExpectFailure(
+    cloudFormation: CloudFormation,
+    simpleFs: SimpleFs,
+    stackName: string,
+    layerArn: string,
+    cloudformationBase: string,
+    sourceRoot: string,
+    generatedCloudFormationTemplateFile: string,
+    extraCloudFormationParameters: StringMap,
+    expectedFailureReason: string
+): Promise<void> {
+    await expect(
+        packageAndDeployExampleProject({
+            cloudFormation,
+            simpleFs,
+            stackName,
+            layerArn,
+            cloudformationBase: cloudformationBase,
+            sourceRoot: sourceRoot,
+            outputFilePath: generatedCloudFormationTemplateFile,
+            extraCloudFormationParameters
+        })
+    ).rejects.toThrow("Failed to create/update the stack");
+
+    await deleteStackIfExists(cloudFormation, stackName);
+
+    /* eslint-disable @typescript-eslint/unbound-method */
+    const stacks: CloudFormation.ListStacksOutput[] = await autoPaginate<
+        CloudFormation,
+        CloudFormation.ListStacksInput,
+        CloudFormation.ListStacksOutput
+    >(cloudFormation, cloudFormation.listStacks, {
+        StackStatusFilter: ["DELETE_COMPLETE"]
+    });
+    /* eslint-enable */
+
+    const mostRecentStackId = stacks
+        .reduce(
+            (acc: CloudFormation.StackSummary[], response) =>
+                acc.concat(response.StackSummaries || []),
+            []
+        )
+        .filter(summary => summary.StackName === stackName)
+        .map(summary => ({
+            id: summary.StackId,
+            time: summary.DeletionTime!.getTime() // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        }))
+        .sort((a, b) => b.time - a.time)[0].id;
+
+    const events = await cloudFormation
+        .describeStackEvents({ StackName: mostRecentStackId })
+        .promise();
+
+    const reasons = events.StackEvents?.filter(
+        event => event.ResourceStatus === "CREATE_FAILED"
+    ).map(event => event.ResourceStatusReason);
+
+    expect(reasons).toContain(expectedFailureReason);
+}
+
 describe("all tests", () => {
     const ASYNC_TIMEOUT_MS = 120_000;
     const TEST_STACK_NAME = "s3-upload-custom-resource-lambda-layer-test-stack";
@@ -249,59 +309,46 @@ describe("all tests", () => {
     test(
         "Cannot create with folder already containing contents",
         async () => {
+            const sourceRoot = path.join(exampleRoot, "src-1");
             const { rootBucketName } = await packageAndDeployExampleProject({
                 cloudFormation,
                 simpleFs,
                 stackName: TEST_STACK_NAME,
                 layerArn,
                 cloudformationBase: path.join(exampleRoot, "cloudformation.yml"),
-                sourceRoot: path.join(exampleRoot, "src-1"),
+                sourceRoot,
                 outputFilePath: generatedCloudFormationTemplateFile
             });
 
-            await expect(
-                packageAndDeployExampleProject({
-                    cloudFormation,
-                    simpleFs,
-                    stackName: TEST_BUCKET_STACK_NAME,
-                    layerArn,
-                    cloudformationBase: path.join(exampleRoot, "bucket-cloudformation.yml"),
-                    sourceRoot: path.join(exampleRoot, "src-1"),
-                    outputFilePath: generatedCloudFormationTemplateFile,
-                    extraCloudFormationParameters: { BucketName: rootBucketName, ObjectPrefix: "" }
-                })
-            ).rejects.toThrow("Failed to create/update the stack");
+            await createStackAndExpectFailure(
+                cloudFormation,
+                simpleFs,
+                TEST_BUCKET_STACK_NAME,
+                layerArn,
+                path.join(exampleRoot, "bucket-cloudformation.yml"),
+                sourceRoot,
+                generatedCloudFormationTemplateFile,
+                { BucketName: rootBucketName, ObjectPrefix: "" },
+                "Failed to create resource. Bucket must be empty"
+            );
+        },
+        ASYNC_TIMEOUT_MS
+    );
 
-            /* eslint-disable @typescript-eslint/unbound-method */
-            const stacks: CloudFormation.ListStacksOutput[] = await autoPaginate<
-                CloudFormation,
-                CloudFormation.ListStacksInput,
-                CloudFormation.ListStacksOutput
-            >(cloudFormation, cloudFormation.listStacks, {
-                StackStatusFilter: ["DELETE_COMPLETE"]
-            });
-            /* eslint-enable */
-
-            const mostRecentStackId = stacks
-                .reduce(
-                    (acc: CloudFormation.StackSummary[], response) =>
-                        acc.concat(response.StackSummaries || []),
-                    []
-                )
-                .map(summary => ({
-                    id: summary.StackId,
-                    name: summary.StackName,
-                    time: summary.DeletionTime!.getMilliseconds() // eslint-disable-line @typescript-eslint/no-non-null-assertion
-                }))
-                .filter(summary => summary.name === TEST_BUCKET_STACK_NAME)
-                .sort((a, b) => b.time - a.time)[0].id;
-            const events = await cloudFormation
-                .describeStackEvents({ StackName: mostRecentStackId })
-                .promise();
-            const reason = events.StackEvents?.find(
-                event => event.ResourceStatus === "CREATE_FAILED"
-            )?.ResourceStatusReason;
-            expect(reason).toEqual("Failed to create resource. Bucket must be empty");
+    test(
+        "Invalid config fails to deploy",
+        async () => {
+            await createStackAndExpectFailure(
+                cloudFormation,
+                simpleFs,
+                TEST_STACK_NAME,
+                layerArn,
+                path.join(exampleRoot, "cloudformation.yml"),
+                path.join(exampleRoot, "invalid-s3uploadconfig-src"),
+                generatedCloudFormationTemplateFile,
+                {},
+                "Failed to create resource. Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token T in JSON at position 0"
+            );
         },
         ASYNC_TIMEOUT_MS
     );

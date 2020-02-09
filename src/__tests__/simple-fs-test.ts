@@ -59,6 +59,24 @@ describe("SimpleFs", () => {
         });
     });
 
+    describe("fileExists", () => {
+        test("non-existent file", () => {
+            expect(simpleFs.fileExists("fake-file")).toBe(false);
+        });
+
+        test("existent file", () => {
+            const file = path.join(tempDir, "file.txt");
+            simpleFs.writeFile(file, "contents");
+            expect(simpleFs.fileExists(file)).toBe(true);
+        });
+
+        test("directory also exists", () => {
+            const folder = path.join(tempDir, "folder");
+            simpleFs.createFolder(folder);
+            expect(simpleFs.fileExists(folder)).toBe(true);
+        });
+    });
+
     describe("listFiles", () => {
         test("non-existent directory", () => {
             const directory = "fake-directory-that-does-not-exist";

@@ -16,6 +16,10 @@ export class SimpleFs {
         return ret;
     }
 
+    public fileExists(file: string): boolean {
+        return fs.existsSync(file);
+    }
+
     public readFile(file: string): Buffer {
         return fs.readFileSync(file);
     }

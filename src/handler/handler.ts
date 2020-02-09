@@ -40,11 +40,17 @@ export abstract class EventHandler {
         const simpleFs = new SimpleFs();
 
         let s3UploadConfig;
-        try {
-            const s3UploadConfigString = simpleFs.readFile(S3_UPLOAD_CONFIG_FILE).toString();
-            s3UploadConfig = new S3UploadConfig(s3UploadConfigString);
-        } catch (e) {
-            console.info(`Unable to read ${S3_UPLOAD_CONFIG_FILE}: ${e}`);
+        if (simpleFs.fileExists(S3_UPLOAD_CONFIG_FILE)) {
+            try {
+                const s3UploadConfigString = simpleFs.readFile(S3_UPLOAD_CONFIG_FILE).toString();
+                s3UploadConfig = new S3UploadConfig(s3UploadConfigString);
+            } catch (e) {
+                await callback({
+                    status: ResponseStatus.FAILED,
+                    reason: `Unable to read or parse ${S3_UPLOAD_CONFIG_FILE}: ${e}`
+                });
+                return;
+            }
         }
 
         let result;
