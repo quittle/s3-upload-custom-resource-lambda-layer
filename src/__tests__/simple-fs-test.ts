@@ -1,6 +1,6 @@
 import { SimpleFs } from "../simple-fs";
-import * as path from "path";
-import * as os from "os";
+import path from "path";
+import os from "os";
 
 describe("SimpleFs", () => {
     const simpleFs = new SimpleFs();

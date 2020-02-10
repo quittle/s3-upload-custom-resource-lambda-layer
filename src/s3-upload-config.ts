@@ -1,5 +1,5 @@
 import { IMinimatch, Minimatch } from "minimatch";
-import * as deepmerge from "deepmerge";
+import deepmerge from "deepmerge";
 import S3 from "aws-sdk/clients/s3";
 
 /** Format of the config file  */

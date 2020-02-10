@@ -1,5 +1,5 @@
-import * as https from "https";
-import * as url from "url";
+import https from "https";
+import url from "url";
 
 import { CustomParameters } from "./resources";
 import {

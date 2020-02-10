@@ -1,10 +1,19 @@
-import * as process from "process";
+import process from "process";
 import { CloudFormation, S3 } from "aws-sdk/clients/all";
-import { SimpleFs } from "../../src/simple-fs";
-import * as path from "path";
-import * as childProcess from "child_process";
-import * as os from "os";
-import { autoPaginate } from "../../src/aws-helper";
+import { SimpleFs } from "../src/simple-fs";
+import path from "path";
+import childProcess from "child_process";
+import os from "os";
+import { autoPaginate } from "../src/aws-helper";
+
+import {
+    fooBarContents1,
+    fooBarContents2,
+    rootContents1,
+    rootContents2,
+    S3Object
+} from "./test-data";
+import { describeStack, StringMap, deleteStackIfExists } from "./test-helpers";
 
 const LAYER_STACK_NAME = process.env.LAYER_STACK_NAME;
 
@@ -13,20 +22,18 @@ if (!LAYER_STACK_NAME) {
             Run "LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst" to test the layer`);
 }
 
-console.info(`Using Lambda Layer Stack: ${LAYER_STACK_NAME}`);
-
-async function deleteStackIfExists(
-    cloudFormation: CloudFormation,
-    stackName: string
-): Promise<void> {
-    await cloudFormation.deleteStack({ StackName: stackName }).promise();
-    await cloudFormation.waitFor("stackDeleteComplete", { StackName: stackName }).promise();
+if (!process.env.AWS_REGION) {
+    throw new Error(
+        "AWS_REGION must be passed in as an environment variable. The AWS JS SDK does not support AWS_DEFAULT_REGION."
+    );
 }
+
+console.info(`Using Lambda Layer Stack: ${LAYER_STACK_NAME}`);
 
 async function compareBucketContents(
     s3: S3,
     bucketName: string,
-    expectedContentsFile: string
+    expectedContents: S3Object[]
 ): Promise<void> {
     type ObjectDescription = {
         Key: string;
@@ -57,8 +64,8 @@ async function compareBucketContents(
             }
         })
     );
-    const expectedResponse = new SimpleFs().readFile(expectedContentsFile).toString();
-    expect(simpleResponse).toStrictEqual(JSON.parse(expectedResponse));
+
+    expect(simpleResponse).toStrictEqual(expectedContents);
 }
 
 interface LayerStackOutputs {
@@ -69,28 +76,6 @@ interface TestStackOutputs {
     rootBucketName: string;
     fooBarBucketName: string;
 }
-
-interface StringMap {
-    [key: string]: string;
-}
-
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-async function describeStack(
-    cloudFormation: CloudFormation,
-    stackName: string
-): Promise<StringMap> {
-    const descriptions = await cloudFormation.describeStacks({ StackName: stackName }).promise();
-    return descriptions.Stacks![0]!.Outputs!.reduce(
-        (accumulator: StringMap, output: CloudFormation.Output) => {
-            return {
-                [output.OutputKey!]: output.OutputValue,
-                ...accumulator
-            } as StringMap;
-        },
-        {}
-    );
-}
-/* eslint-enable */
 
 async function describeTestStack(
     cloudFormation: CloudFormation,
@@ -218,8 +203,7 @@ describe("all tests", () => {
     const ASYNC_TIMEOUT_MS = 120_000;
     const TEST_STACK_NAME = "s3-upload-custom-resource-lambda-layer-test-stack";
     const TEST_BUCKET_STACK_NAME = "s3-upload-custom-resource-lambda-layer-bucket-test-stack";
-    const exampleRoot = __dirname;
-    const testDataDir = path.join(exampleRoot, "test-data");
+    const exampleRoot = path.join(__dirname, "example-project");
 
     const cloudFormation = new CloudFormation();
     const s3 = new S3();
@@ -268,16 +252,8 @@ describe("all tests", () => {
             );
 
             await Promise.all([
-                compareBucketContents(
-                    s3,
-                    rootBucketName,
-                    path.join(testDataDir, "root-contents-1.txt")
-                ),
-                compareBucketContents(
-                    s3,
-                    fooBarBucketName,
-                    path.join(testDataDir, "foo-bar-contents-1.txt")
-                )
+                compareBucketContents(s3, rootBucketName, rootContents1),
+                compareBucketContents(s3, fooBarBucketName, fooBarContents1)
             ]);
 
             await packageAndDeployExampleProject({
@@ -291,16 +267,8 @@ describe("all tests", () => {
             });
 
             await Promise.all([
-                compareBucketContents(
-                    s3,
-                    rootBucketName,
-                    path.join(testDataDir, "root-contents-2.txt")
-                ),
-                compareBucketContents(
-                    s3,
-                    fooBarBucketName,
-                    path.join(testDataDir, "foo-bar-contents-2.txt")
-                )
+                compareBucketContents(s3, rootBucketName, rootContents2),
+                compareBucketContents(s3, fooBarBucketName, fooBarContents2)
             ]);
         },
         ASYNC_TIMEOUT_MS
