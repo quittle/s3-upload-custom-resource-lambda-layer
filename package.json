@@ -41,7 +41,7 @@
         "webpack-cli": "^3.3.11"
     },
     "dependencies": {
-        "aws-sdk": "^2.615.0",
+        "aws-sdk": "^2.630.0",
         "deepmerge": "^4.2.2",
         "minimatch": "^3.0.4"
     }
