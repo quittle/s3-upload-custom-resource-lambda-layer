@@ -7,7 +7,7 @@ interface S3Object {
     Key: string;
     Size: number;
     ETag: string;
-    Metadata: { [key: string]: string };
+    Metadata: { [key: string]: string | undefined };
     ContentType: string;
     ContentDisposition?: string;
 }
