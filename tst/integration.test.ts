@@ -11,7 +11,7 @@ import {
     fooBarContents2,
     rootContents1,
     rootContents2,
-    S3Object
+    S3Object,
 } from "./test-data";
 import { describeStack, StringMap, deleteStackIfExists } from "./test-helpers";
 
@@ -45,14 +45,14 @@ async function compareBucketContents(
     };
     const response = await s3.listObjectsV2({ Bucket: bucketName }).promise();
     const simpleResponse: ObjectDescription[] =
-        response.Contents?.map(c => ({
+        response.Contents?.map((c) => ({
             Key: c.Key as string,
             Size: c.Size,
-            ETag: c.ETag
+            ETag: c.ETag,
         })) ?? [];
 
     await Promise.all(
-        simpleResponse.map(async response => {
+        simpleResponse.map(async (response) => {
             const description = await s3
                 .headObject({ Bucket: bucketName, Key: response.Key })
                 .promise();
@@ -84,7 +84,7 @@ async function describeTestStack(
     const stringMap = await describeStack(cloudFormation, stackName);
     return {
         rootBucketName: stringMap.RootTestBucketName,
-        fooBarBucketName: stringMap.FooBarTestBucketName
+        fooBarBucketName: stringMap.FooBarTestBucketName,
     };
 }
 
@@ -94,7 +94,7 @@ async function describeLayerStack(
 ): Promise<LayerStackOutputs> {
     const stringMap = await describeStack(cloudFormation, stackName);
     return {
-        layerArn: stringMap.LayerArn
+        layerArn: stringMap.LayerArn,
     };
 }
 
@@ -159,7 +159,7 @@ async function createStackAndExpectFailure(
             cloudformationBase: cloudformationBase,
             sourceRoot: sourceRoot,
             outputFilePath: generatedCloudFormationTemplateFile,
-            extraCloudFormationParameters
+            extraCloudFormationParameters,
         })
     ).rejects.toThrow("Failed to create/update the stack");
 
@@ -171,7 +171,7 @@ async function createStackAndExpectFailure(
         CloudFormation.ListStacksInput,
         CloudFormation.ListStacksOutput
     >(cloudFormation, cloudFormation.listStacks, {
-        StackStatusFilter: ["DELETE_COMPLETE"]
+        StackStatusFilter: ["DELETE_COMPLETE"],
     });
     /* eslint-enable */
 
@@ -181,10 +181,10 @@ async function createStackAndExpectFailure(
                 acc.concat(response.StackSummaries || []),
             []
         )
-        .filter(summary => summary.StackName === stackName)
-        .map(summary => ({
+        .filter((summary) => summary.StackName === stackName)
+        .map((summary) => ({
             id: summary.StackId,
-            time: summary.DeletionTime!.getTime() // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            time: summary.DeletionTime!.getTime(), // eslint-disable-line @typescript-eslint/no-non-null-assertion
         }))
         .sort((a, b) => b.time - a.time)[0].id;
 
@@ -193,8 +193,8 @@ async function createStackAndExpectFailure(
         .promise();
 
     const reasons = events.StackEvents?.filter(
-        event => event.ResourceStatus === "CREATE_FAILED"
-    ).map(event => event.ResourceStatusReason);
+        (event) => event.ResourceStatus === "CREATE_FAILED"
+    ).map((event) => event.ResourceStatusReason);
 
     expect(reasons).toContain(expectedFailureReason);
 }
@@ -221,7 +221,7 @@ describe("all tests", () => {
         simpleFs.createFolder(tempDir);
         await Promise.all([
             deleteStackIfExists(cloudFormation, TEST_BUCKET_STACK_NAME),
-            deleteStackIfExists(cloudFormation, TEST_STACK_NAME)
+            deleteStackIfExists(cloudFormation, TEST_STACK_NAME),
         ]);
     }, ASYNC_TIMEOUT_MS);
 
@@ -229,7 +229,7 @@ describe("all tests", () => {
         simpleFs.deleteFolder(tempDir);
         await Promise.all([
             deleteStackIfExists(cloudFormation, TEST_BUCKET_STACK_NAME),
-            deleteStackIfExists(cloudFormation, TEST_STACK_NAME)
+            deleteStackIfExists(cloudFormation, TEST_STACK_NAME),
         ]);
     }, ASYNC_TIMEOUT_MS);
 
@@ -244,7 +244,7 @@ describe("all tests", () => {
                 layerArn,
                 cloudformationBase: template,
                 sourceRoot: path.join(exampleRoot, "src-1"),
-                outputFilePath: generatedCloudFormationTemplateFile
+                outputFilePath: generatedCloudFormationTemplateFile,
             });
 
             console.debug(
@@ -253,7 +253,7 @@ describe("all tests", () => {
 
             await Promise.all([
                 compareBucketContents(s3, rootBucketName, rootContents1),
-                compareBucketContents(s3, fooBarBucketName, fooBarContents1)
+                compareBucketContents(s3, fooBarBucketName, fooBarContents1),
             ]);
 
             await packageAndDeployExampleProject({
@@ -263,12 +263,12 @@ describe("all tests", () => {
                 layerArn,
                 cloudformationBase: template,
                 sourceRoot: path.join(exampleRoot, "src-2"),
-                outputFilePath: generatedCloudFormationTemplateFile
+                outputFilePath: generatedCloudFormationTemplateFile,
             });
 
             await Promise.all([
                 compareBucketContents(s3, rootBucketName, rootContents2),
-                compareBucketContents(s3, fooBarBucketName, fooBarContents2)
+                compareBucketContents(s3, fooBarBucketName, fooBarContents2),
             ]);
         },
         ASYNC_TIMEOUT_MS
@@ -285,7 +285,7 @@ describe("all tests", () => {
                 layerArn,
                 cloudformationBase: path.join(exampleRoot, "cloudformation.yml"),
                 sourceRoot,
-                outputFilePath: generatedCloudFormationTemplateFile
+                outputFilePath: generatedCloudFormationTemplateFile,
             });
 
             await createStackAndExpectFailure(

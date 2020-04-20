@@ -14,7 +14,7 @@ async function describeStack(
         (accumulator: StringMap, output: CloudFormation.Output) => {
             return {
                 [output.OutputKey!]: output.OutputValue,
-                ...accumulator
+                ...accumulator,
             } as StringMap;
         },
         {}

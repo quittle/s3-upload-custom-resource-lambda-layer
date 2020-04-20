@@ -36,7 +36,7 @@ class S3UploadConfig {
 
         this.parsedS3UploadConfig = Object.entries(fileJson).map(([key, value]) => [
             new Minimatch(key),
-            value
+            value,
         ]);
     }
 

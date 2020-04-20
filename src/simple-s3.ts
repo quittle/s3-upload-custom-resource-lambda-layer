@@ -18,12 +18,12 @@ export class SimpleS3 {
             this.s3.listObjectsV2,
             {
                 Bucket: bucketName,
-                Prefix: objectPrefix
+                Prefix: objectPrefix,
             }
         );
         const keys = response.reduce(
             (acc: string[], page) =>
-                acc.concat(page.Contents?.map(object => object?.Key) as string[]),
+                acc.concat(page.Contents?.map((object) => object?.Key) as string[]),
             []
         );
         return keys;
@@ -37,10 +37,10 @@ export class SimpleS3 {
             .listObjectsV2({
                 Bucket: bucketName,
                 Prefix: objectPrefix,
-                MaxKeys: 1
+                MaxKeys: 1,
             })
             .promise()
-            .then(data => {
+            .then((data) => {
                 if (data.KeyCount && data.KeyCount > 0) {
                     return false;
                 } else {
@@ -63,7 +63,7 @@ export class SimpleS3 {
                 Bucket: bucketName,
                 Key: key,
                 Body: localFileContents,
-                ...extraParams
+                ...extraParams,
             })
             .promise();
     }

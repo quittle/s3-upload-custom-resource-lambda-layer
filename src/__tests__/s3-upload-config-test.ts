@@ -34,10 +34,10 @@ describe("S3UploadConfig", () => {
             newS3UploadConfig({ file: { contentType: {} } });
             newS3UploadConfig({ file: { metadata: {}, contentType: "", contentDisposition: "" } });
             newS3UploadConfig({
-                file: { metadata: { key: "value" }, contentType: "", contentDisposition: "" }
+                file: { metadata: { key: "value" }, contentType: "", contentDisposition: "" },
             });
             newS3UploadConfig({
-                file: { metadata: null, contentType: null, contentDisposition: null }
+                file: { metadata: null, contentType: null, contentDisposition: null },
             });
             newS3UploadConfig({ file: { unknownKey: "unknownValue" } });
         });
@@ -47,14 +47,14 @@ describe("S3UploadConfig", () => {
                 "*.txt": {
                     metadata: {
                         "my-key": "value",
-                        otherKey: "value"
+                        otherKey: "value",
                     },
-                    contentType: "text/plain"
+                    contentType: "text/plain",
                 },
                 "src/**/*.png": {
                     contentType: "image/png",
-                    contentDisposition: 'attachment; filename="download.png"'
-                }
+                    contentDisposition: 'attachment; filename="download.png"',
+                },
             });
         });
     });
@@ -75,19 +75,19 @@ describe("S3UploadConfig", () => {
                 newS3UploadConfig({
                     "file.txt": {
                         metadata: {
-                            key: "value"
+                            key: "value",
                         },
                         contentType: "text/plain",
                         contentDisposition: "inline; filename=other-name.txt",
-                        randomKey: "value"
-                    }
+                        randomKey: "value",
+                    },
                 }).getS3ParamsForKey("file.txt")
             ).toStrictEqual({
                 Metadata: {
-                    key: "value"
+                    key: "value",
                 },
                 ContentType: "text/plain",
-                ContentDisposition: "inline; filename=other-name.txt"
+                ContentDisposition: "inline; filename=other-name.txt",
             });
         });
 
@@ -96,14 +96,14 @@ describe("S3UploadConfig", () => {
                 newS3UploadConfig({
                     "*.md": {
                         metadata: {
-                            type: "markdown"
-                        }
-                    }
+                            type: "markdown",
+                        },
+                    },
                 }).getS3ParamsForKey("README.md")
             ).toStrictEqual({
                 Metadata: {
-                    type: "markdown"
-                }
+                    type: "markdown",
+                },
             });
         });
 
@@ -112,22 +112,22 @@ describe("S3UploadConfig", () => {
                 newS3UploadConfig({
                     "*/*.md": {
                         metadata: {
-                            type: "markdown"
-                        }
+                            type: "markdown",
+                        },
                     },
                     "src/*.md": {
                         metadata: {
-                            isSrc: "true"
+                            isSrc: "true",
                         },
-                        contentType: "text/markdown"
-                    }
+                        contentType: "text/markdown",
+                    },
                 }).getS3ParamsForKey("src/README.md")
             ).toStrictEqual({
                 Metadata: {
                     type: "markdown",
-                    isSrc: "true"
+                    isSrc: "true",
                 },
-                ContentType: "text/markdown"
+                ContentType: "text/markdown",
             });
         });
 
@@ -135,27 +135,27 @@ describe("S3UploadConfig", () => {
             expect(
                 newS3UploadConfig({
                     "*": {
-                        contentType: "base"
+                        contentType: "base",
                     },
                     file: {
-                        contentType: "override"
-                    }
+                        contentType: "override",
+                    },
                 }).getS3ParamsForKey("file")
             ).toStrictEqual({
-                ContentType: "override"
+                ContentType: "override",
             });
 
             expect(
                 newS3UploadConfig({
                     file: {
-                        contentType: "base"
+                        contentType: "base",
                     },
                     "*": {
-                        contentType: "override"
-                    }
+                        contentType: "override",
+                    },
                 }).getS3ParamsForKey("file")
             ).toStrictEqual({
-                ContentType: "override"
+                ContentType: "override",
             });
         });
     });

@@ -105,7 +105,7 @@ describe("SimpleFs", () => {
                     "package.json", // Root file
                     ".gitignore", // Hidden file
                     "src/index.ts", // In directory
-                    "src/__tests__/simple-fs-test.ts" // Deep file in directory
+                    "src/__tests__/simple-fs-test.ts", // Deep file in directory
                 ])
             );
 

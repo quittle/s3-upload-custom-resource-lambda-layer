@@ -6,7 +6,7 @@ import {
     ResponseStatus,
     RequestType,
     CloudformationEvent,
-    CloudformationContext
+    CloudformationContext,
 } from "./cloudformation-types";
 import { ResultCallback, ResultType, CreateHandler, UpdateHandler, DeleteHandler } from "./handler";
 
@@ -44,7 +44,7 @@ async function sendResponse(
         StackId: event.StackId,
         RequestId: event.RequestId,
         LogicalResourceId: event.LogicalResourceId,
-        Data: responseData
+        Data: responseData,
     });
 
     console.log("RESPONSE BODY:\n", responseBody);
@@ -57,21 +57,21 @@ async function sendResponse(
         method: "PUT",
         headers: {
             "content-type": "",
-            "content-length": responseBody.length
-        }
+            "content-length": responseBody.length,
+        },
     };
 
     console.log("SENDING RESPONSE...\n");
 
     await new Promise((resolve, reject) => {
-        const request = https.request(options, function(response) {
+        const request = https.request(options, function (response) {
             console.log("STATUS: " + response.statusCode);
             console.log("HEADERS: " + JSON.stringify(response.headers));
             // Tell AWS Lambda that the function execution is done
             resolve();
         });
 
-        request.on("error", function(error) {
+        request.on("error", function (error) {
             console.log("sendResponse Error:" + error);
             // Tell AWS Lambda that the function execution is done
             reject();
@@ -84,7 +84,7 @@ async function sendResponse(
     });
 }
 
-exports.handler = async function(
+exports.handler = async function (
     event: CloudformationEvent,
     context: CloudformationContext
 ): Promise<void> {
@@ -99,7 +99,7 @@ exports.handler = async function(
     } catch (errorMessage) {
         return await callback({
             status: ResponseStatus.FAILED,
-            reason: errorMessage
+            reason: errorMessage,
         });
     }
 
@@ -113,7 +113,7 @@ exports.handler = async function(
         default:
             return await callback({
                 status: ResponseStatus.FAILED,
-                reason: `Unknown request type ${event.RequestType}`
+                reason: `Unknown request type ${event.RequestType}`,
             });
     }
 };

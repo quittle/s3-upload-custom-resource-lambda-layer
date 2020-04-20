@@ -19,14 +19,14 @@ export class CreateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in bucket. (${e})`
+                reason: `Unable to list objects in bucket. (${e})`,
             };
         }
 
         if (!isBucketEmpty) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: "Bucket must be empty"
+                reason: "Bucket must be empty",
             };
         }
 
@@ -35,8 +35,8 @@ export class CreateHandler extends EventHandler {
         try {
             await Promise.all(
                 files
-                    .filter(file => file !== S3_UPLOAD_CONFIG_FILE)
-                    .map(file => {
+                    .filter((file) => file !== S3_UPLOAD_CONFIG_FILE)
+                    .map((file) => {
                         const contents = simpleFs.readFile(file);
                         const extraParams = s3UploadFile?.getS3ParamsForKey(file);
                         return simpleS3.uploadFile(
@@ -51,12 +51,12 @@ export class CreateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to upload files to S3. (${e})`
+                reason: `Unable to upload files to S3. (${e})`,
             };
         }
 
         return {
-            status: ResponseStatus.SUCCESS
+            status: ResponseStatus.SUCCESS,
         };
     }
 }

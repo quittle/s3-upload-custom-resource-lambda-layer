@@ -20,16 +20,16 @@ export class UpdateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in bucket. (${e})`
+                reason: `Unable to list objects in bucket. (${e})`,
             };
         }
 
         try {
-            await Promise.all(currentKeys.map(key => simpleS3.deleteObject(bucketName, key)));
+            await Promise.all(currentKeys.map((key) => simpleS3.deleteObject(bucketName, key)));
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to delete objects in ${bucketName}. (${e})`
+                reason: `Unable to delete objects in ${bucketName}. (${e})`,
             };
         }
 
@@ -38,8 +38,8 @@ export class UpdateHandler extends EventHandler {
         try {
             await Promise.all(
                 files
-                    .filter(file => file !== S3_UPLOAD_CONFIG_FILE)
-                    .map(async file => {
+                    .filter((file) => file !== S3_UPLOAD_CONFIG_FILE)
+                    .map(async (file) => {
                         const contents = simpleFs.readFile(file);
                         const extraParams = s3UploadFile?.getS3ParamsForKey(file);
                         return simpleS3.uploadFile(
@@ -54,12 +54,12 @@ export class UpdateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to upload files to S3. (${e})`
+                reason: `Unable to upload files to S3. (${e})`,
             };
         }
 
         return {
-            status: ResponseStatus.SUCCESS
+            status: ResponseStatus.SUCCESS,
         };
     }
 }

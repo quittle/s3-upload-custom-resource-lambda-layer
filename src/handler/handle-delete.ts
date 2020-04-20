@@ -17,20 +17,20 @@ export class DeleteHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in ${bucketName}. (${e})`
+                reason: `Unable to list objects in ${bucketName}. (${e})`,
             };
         }
         try {
-            await Promise.all(keys.map(key => simpleS3.deleteObject(bucketName, key)));
+            await Promise.all(keys.map((key) => simpleS3.deleteObject(bucketName, key)));
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to delete objects in ${bucketName}. (${e})`
+                reason: `Unable to delete objects in ${bucketName}. (${e})`,
             };
         }
 
         return {
-            status: ResponseStatus.SUCCESS
+            status: ResponseStatus.SUCCESS,
         };
     }
 }
