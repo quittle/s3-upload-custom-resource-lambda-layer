@@ -1,46 +1,50 @@
 {
-    "name": "s3-upload-custom-resource-lambda-layer",
-    "version": "1.0.0",
-    "author": "Dustin Toff",
-    "license": "Apache-2.0",
-    "engines": {
-        "node": "=12.14.1"
-    },
-    "scripts": {
-        "build": "webpack",
-        "test": "npm run unit-test && npm run integration-test",
-        "unit-test": "jest src",
-        "integration-test": "npm run build && npm run package && npm run integration-test:deploy-layer && npm run integration-test:run",
-        "integration-test:deploy-layer": "scripts/deploy_lambda_layer S3UploadCustomResourceBeta s3-upload-custom-resource-lambda-layer-beta",
-        "integration-test:run": "LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst",
-        "package": "scripts/build_lambda_layer_zip",
-        "lint": "eslint . --ext .js,.ts",
-        "lint-fix": "eslint . --ext .js,.ts --fix",
-        "prettier": "prettier --check '**'",
-        "prettier-fix": "prettier --write '**'",
-        "check": "npm run lint && npm run prettier && npm run unit-test",
-        "deploy": "scripts/deploy_lambda_layer S3UploadCustomResource s3-upload-custom-resource-lambda-layer",
-        "build-and-test": "npm run build && npm run check && npm run integration-test",
-        "release": "npm run build && npm run package && npm run deploy"
-    },
-    "devDependencies": {
-        "@types/jest": "^25.2.1",
-        "@types/minimatch": "^3.0.3",
-        "@types/node": "^13.13.1",
-        "@typescript-eslint/eslint-plugin": "^2.29.0",
-        "@typescript-eslint/parser": "^2.29.0",
-        "eslint": "^6.8.0",
-        "jest": "^25.4.0",
-        "prettier": "^2.0.4",
-        "ts-jest": "^25.4.0",
-        "ts-loader": "^7.0.2",
-        "typescript": "^3.8.3",
-        "webpack": "^4.42.1",
-        "webpack-cli": "^3.3.11"
-    },
-    "dependencies": {
-        "aws-sdk": "^2.658.0",
-        "deepmerge": "^4.2.2",
-        "minimatch": "^3.0.4"
-    }
+  "name": "s3-upload-custom-resource-lambda-layer",
+  "version": "1.0.0",
+  "author": "Dustin Toff",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": "=12.14.1"
+  },
+  "scripts": {
+    "build": "webpack",
+    "test": "npm run unit-test && npm run integration-test",
+    "unit-test": "jest src",
+    "integration-test": "npm run build && npm run package && npm run integration-test:deploy-layer && npm run integration-test:run",
+    "integration-test:deploy-layer": "scripts/deploy_lambda_layer S3UploadCustomResourceBeta s3-upload-custom-resource-lambda-layer-beta",
+    "integration-test:run": "LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst",
+    "package": "scripts/build_lambda_layer_zip",
+    "lint": "eslint . --ext .js,.ts",
+    "lint-fix": "eslint . --ext .js,.ts --fix",
+    "prettier": "prettier --check '**'",
+    "prettier-fix": "prettier --write '**'",
+    "check": "npm run lint && npm run prettier && npm run unit-test",
+    "deploy": "scripts/deploy_lambda_layer S3UploadCustomResource s3-upload-custom-resource-lambda-layer",
+    "build-and-test": "npm run build && npm run check && npm run integration-test",
+    "release": "npm run build && npm run package && npm run deploy",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/minimatch": "^3.0.3",
+    "@types/node": "^13.13.1",
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0",
+    "eslint": "^6.8.0",
+    "jest": "^25.4.0",
+    "prettier": "^2.0.4",
+    "ts-jest": "^25.4.0",
+    "ts-loader": "^7.0.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.658.0",
+    "deepmerge": "^4.2.2",
+    "minimatch": "^3.0.4",
+    "snyk": "^1.316.2"
+  },
+  "snyk": true
 }
