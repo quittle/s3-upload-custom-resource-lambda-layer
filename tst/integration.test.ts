@@ -200,7 +200,7 @@ async function createStackAndExpectFailure(
 }
 
 describe("all tests", () => {
-    const ASYNC_TIMEOUT_MS = 120_000;
+    const ASYNC_TIMEOUT_MS = 180_000;
     const TEST_STACK_NAME = "s3-upload-custom-resource-lambda-layer-test-stack";
     const TEST_BUCKET_STACK_NAME = "s3-upload-custom-resource-lambda-layer-bucket-test-stack";
     const exampleRoot = path.join(__dirname, "example-project");
