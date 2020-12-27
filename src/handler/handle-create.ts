@@ -19,7 +19,7 @@ export class CreateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in bucket. (${e})`,
+                reason: `Unable to list objects in bucket. (${(e as Error).toString()})`,
             };
         }
 
@@ -51,7 +51,7 @@ export class CreateHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to upload files to S3. (${e})`,
+                reason: `Unable to upload files to S3. (${(e as Error).toString()})`,
             };
         }
 

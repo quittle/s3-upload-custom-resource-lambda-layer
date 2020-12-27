@@ -21,12 +21,12 @@ function getObjectPrefix(event: CloudformationEvent): string | undefined {
 function validateArguments(event: CloudformationEvent): void {
     const bucketName = getNewBucketName(event);
     if (!bucketName) {
-        throw `${CustomParameters.BUCKET_NAME} must be specified.`;
+        throw new Error(`${CustomParameters.BUCKET_NAME} must be specified.`);
     }
 }
 
 function computePhysicalId(event: CloudformationEvent): string {
-    return `Bucket:${getNewBucketName(event)} ObjectPrefix: ${getObjectPrefix(event)}`;
+    return `Bucket: ${getNewBucketName(event)} ObjectPrefix: ${getObjectPrefix(event)}`;
 }
 
 // Send response to the pre-signed S3 URL
@@ -35,7 +35,7 @@ async function sendResponse(
     context: CloudformationContext,
     responseStatus: ResponseStatus,
     responseReason?: string,
-    responseData?: object
+    responseData?: Record<string, unknown>
 ): Promise<void> {
     const responseBody = JSON.stringify({
         Status: responseStatus,
@@ -63,16 +63,16 @@ async function sendResponse(
 
     console.log("SENDING RESPONSE...\n");
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
         const request = https.request(options, function (response) {
-            console.log("STATUS: " + response.statusCode);
-            console.log("HEADERS: " + JSON.stringify(response.headers));
+            console.log(`STATUS: ${response.statusCode}`);
+            console.log(`HEADERS: ${JSON.stringify(response.headers)}`);
             // Tell AWS Lambda that the function execution is done
             resolve();
         });
 
         request.on("error", function (error) {
-            console.log("sendResponse Error:" + error);
+            console.log("sendResponse Error: ", error);
             // Tell AWS Lambda that the function execution is done
             reject();
         });
@@ -84,10 +84,7 @@ async function sendResponse(
     });
 }
 
-exports.handler = async function (
-    event: CloudformationEvent,
-    context: CloudformationContext
-): Promise<void> {
+async function handler(event: CloudformationEvent, context: CloudformationContext): Promise<void> {
     console.log("REQUEST RECEIVED:\n" + JSON.stringify(event));
 
     const callback: ResultCallback = async (result: ResultType) => {
@@ -96,10 +93,10 @@ exports.handler = async function (
 
     try {
         validateArguments(event);
-    } catch (errorMessage) {
+    } catch (e) {
         return await callback({
             status: ResponseStatus.FAILED,
-            reason: errorMessage,
+            reason: (e as Error).toString(),
         });
     }
 
@@ -113,7 +110,10 @@ exports.handler = async function (
         default:
             return await callback({
                 status: ResponseStatus.FAILED,
-                reason: `Unknown request type ${event.RequestType}`,
+                reason: `Unknown request type ${event.RequestType as string}`,
             });
     }
-};
+}
+
+declare const exports: Record<string, unknown>;
+exports.handler = handler;

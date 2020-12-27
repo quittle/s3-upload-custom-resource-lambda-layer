@@ -28,7 +28,7 @@ class S3UploadConfig {
      * @param s3UploadConfigContents The contents of the S3 upload configuration file
      */
     constructor(s3UploadConfigContents: string) {
-        const fileJson: S3UploadFileStructure = JSON.parse(s3UploadConfigContents);
+        const fileJson = JSON.parse(s3UploadConfigContents) as S3UploadFileStructure;
 
         if (!(fileJson instanceof Object) || Array.isArray(fileJson)) {
             throw new Error(`Invalid config: ${s3UploadConfigContents}`);

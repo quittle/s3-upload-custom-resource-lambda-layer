@@ -7,7 +7,7 @@ describe("SimpleFs", () => {
     let tempDir: string;
 
     beforeEach(() => {
-        tempDir = path.join(os.tmpdir(), "__simple-fs-test-dir__" + Math.random());
+        tempDir = path.join(os.tmpdir(), `__simple-fs-test-dir__${Math.random()}`);
         simpleFs.deleteFolder(tempDir);
         simpleFs.createFolder(tempDir);
     });
@@ -33,7 +33,7 @@ describe("SimpleFs", () => {
         test("real file", () => {
             const contentsString = simpleFs.readFile("package.json").toString();
 
-            const contents: object = JSON.parse(contentsString);
+            const contents = JSON.parse(contentsString) as Record<string, unknown>;
 
             // Make sure it's a non-trivial object so we're not just lucky that it read some file
             expect(Object.keys(contents).length).toBeGreaterThan(1);

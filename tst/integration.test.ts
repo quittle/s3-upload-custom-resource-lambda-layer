@@ -120,10 +120,15 @@ async function packageAndDeployExampleProject(args: {
             --output-template-file "${args.outputFilePath}" \
             --use-json`);
 
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const generatedCloudFormationContents = JSON.parse(
         args.simpleFs.readFile(args.outputFilePath).toString()
     );
-    const codeUri = generatedCloudFormationContents.Resources.TestUploaderLambda.Properties.CodeUri;
+
+    const codeUri: string =
+        generatedCloudFormationContents.Resources.TestUploaderLambda.Properties.CodeUri;
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+
     const extraParameters = args.extraCloudFormationParameters
         ? Object.entries(args.extraCloudFormationParameters)
               .map(([key, value]) => `"${key}=${value}"`)
@@ -215,7 +220,7 @@ describe("all tests", () => {
 
     beforeEach(async () => {
         layerArn = (await describeLayerStack(cloudFormation, LAYER_STACK_NAME)).layerArn;
-        tempDir = path.join(os.tmpdir(), "__integration-test-tmp-dir__" + Math.random());
+        tempDir = path.join(os.tmpdir(), `__integration-test-tmp-dir__${Math.random()}`);
         generatedCloudFormationTemplateFile = path.join(tempDir, "example-cloudformation.yml");
         simpleFs.deleteFolder(tempDir);
         simpleFs.createFolder(tempDir);

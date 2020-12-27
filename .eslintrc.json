@@ -17,6 +17,12 @@
             {
                 "argsIgnorePattern": "^_"
             }
+        ],
+        "@typescript-eslint/restrict-template-expressions": [
+            "error",
+            {
+                "allowNullish": true
+            }
         ]
     },
     "reportUnusedDisableDirectives": true,

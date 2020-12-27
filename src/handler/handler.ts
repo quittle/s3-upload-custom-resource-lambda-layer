@@ -47,7 +47,7 @@ export abstract class EventHandler {
             } catch (e) {
                 await callback({
                     status: ResponseStatus.FAILED,
-                    reason: `Unable to read or parse ${S3_UPLOAD_CONFIG_FILE}: ${e}`,
+                    reason: `Unable to read or parse ${S3_UPLOAD_CONFIG_FILE}: ${(e as Error).toString()}`,
                 });
                 return;
             }
@@ -59,14 +59,14 @@ export abstract class EventHandler {
         } catch (e) {
             result = {
                 status: ResponseStatus.FAILED,
-                reason: `Failure when handling event. (${e})`,
+                reason: `Failure when handling event. (${(e as Error).toString()})`,
             };
         }
 
         await callback(result);
     }
 
-    protected abstract async handleEvent(
+    protected abstract handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,
         simpleFs: SimpleFs,

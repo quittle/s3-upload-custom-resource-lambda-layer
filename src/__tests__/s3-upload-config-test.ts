@@ -4,7 +4,7 @@ import { S3UploadConfig } from "../s3-upload-config";
  * Helper function to build an S3UploadConfig while maintaining basic JSON type safety
  * @param config The config to serialize and construct an S3UploadConfig from
  */
-function newS3UploadConfig(config: object): S3UploadConfig {
+function newS3UploadConfig(config: Record<string, unknown>): S3UploadConfig {
     return new S3UploadConfig(JSON.stringify(config));
 }
 

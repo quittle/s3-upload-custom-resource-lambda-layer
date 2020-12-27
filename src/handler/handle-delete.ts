@@ -17,7 +17,7 @@ export class DeleteHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to list objects in ${bucketName}. (${e})`,
+                reason: `Unable to list objects in ${bucketName}. (${(e as Error).toString()})`,
             };
         }
         try {
@@ -25,7 +25,7 @@ export class DeleteHandler extends EventHandler {
         } catch (e) {
             return {
                 status: ResponseStatus.FAILED,
-                reason: `Unable to delete objects in ${bucketName}. (${e})`,
+                reason: `Unable to delete objects in ${bucketName}. (${(e as Error).toString()})`,
             };
         }
 
