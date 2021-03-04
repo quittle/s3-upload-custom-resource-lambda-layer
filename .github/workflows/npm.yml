@@ -1,0 +1,34 @@
+on: [push, pull_request]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            # The AWS JS SDK only respects AWS_REGION, not AWS_DEFAULT_REGION
+            # See https://github.com/aws/aws-sdk-js/issues/2929
+            AWS_DEFAULT_REGION: us-east-1
+            AWS_REGION: us-east-1
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: APT Install
+              run: |
+                  sudo apt-get install \
+                    jq \
+                    python3-pip \
+                    python3-setuptools
+            - name: PIP Install
+              run: |
+                  pip3 install awscli --upgrade --user
+            - name: NVM Install
+              run: |
+                  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+                  . $HOME/.nvm/nvm.sh
+                  nvm install
+            - name: NPM Install
+              run: npm ci
+            - name: Build and Test
+              run: npm run build-and-test
+            - name: Release
+              if: github.ref == 'refs/heads/main'
+              run: npm run release
