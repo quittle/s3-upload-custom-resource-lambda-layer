@@ -87,31 +87,47 @@ async function sendResponse(
 async function handler(event: CloudformationEvent, context: CloudformationContext): Promise<void> {
     console.log("REQUEST RECEIVED:\n" + JSON.stringify(event));
 
-    const callback: ResultCallback = async (result: ResultType) => {
+    const callback: ResultCallback = async (result: ResultType): Promise<void> => {
         await sendResponse(event, context, result.status, result.reason);
     };
 
     try {
         validateArguments(event);
     } catch (e) {
-        return await callback({
+        await callback({
             status: ResponseStatus.FAILED,
             reason: (e as Error).toString(),
         });
+        return;
     }
 
+    let handler;
     switch (event.RequestType) {
         case RequestType.CREATE:
-            return await new CreateHandler().handle(event, callback);
+            handler = new CreateHandler();
+            break;
         case RequestType.UPDATE:
-            return await new UpdateHandler().handle(event, callback);
+            handler = new UpdateHandler();
+            break;
         case RequestType.DELETE:
-            return await new DeleteHandler().handle(event, callback);
+            handler = new DeleteHandler();
+            break;
         default:
-            return await callback({
+            await callback({
                 status: ResponseStatus.FAILED,
                 reason: `Unknown request type ${event.RequestType as string}`,
             });
+            return;
+    }
+
+    try {
+        await handler.handle(event, callback);
+    } catch (e) {
+        await callback({
+            status: ResponseStatus.FAILED,
+            reason: (e as Error).toString(),
+        });
+        return;
     }
 }
 
