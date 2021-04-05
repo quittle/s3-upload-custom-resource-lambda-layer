@@ -2,7 +2,50 @@
 
 This project builds an [AWS Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) to deploy files to S3 buckets as part of a CloudFormation deployment. Using [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html), you can use a Lambda function and a [CloudFormation Custom Resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources.html) to upload files to your S3 bucket. All the deployment logic is baked into the layer provided by this project so the only things needed from the consumer is the files, the generated Lambda function, and the permissions to deploy to the bucket. Here is a minimal example of how to use it.
 
+This project used to recommend taking a dependency on a layer exposed by this project's AWS account. This has numerous issues including security concerns from consumers and difficulty exposing the latest version of the layer. Going forward, this project will release the layer as a zip file available in each release of the project.
+
 ## Example CloudFormation Template
+
+**Preferred method of consumption**
+
+```yaml
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+    DeploymentContentVersion:
+        Type: String
+        Description: This can be any unique string that identifies the current set of files you are deploying.
+Resources:
+    WebsiteBucket:
+        Type: AWS::S3::Bucket
+    S3UploadLambdaLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            ContentUri: local/path/to/layer.zip # This is the layer downloaded from a release of this project
+    S3UploadLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            Layers: [!Ref S3UploadLambdaLayer]
+            CodeUri:
+                local/path/to/assets # This is a local path to a folder of files you want to deploy,
+                # either your build or source directory, depending on how your
+                # site is configured.
+            Handler:
+                s3-upload-custom-resource.handler # This is fixed and references a file provided by
+                # this project and available in the Lambda layer.
+            Runtime: nodejs12.x
+            Policies:
+                - S3CrudPolicy:
+                      BucketName: !Ref WebsiteBucket
+    DeployWebsite:
+        Type: Custom::UploadFilesToS3
+        Properties:
+            ServiceToken: !GetAtt S3UploadLambda.Arn
+            BucketName: !Ref WebsiteBucket
+            ContentVersion: !Ref DeploymentContentVersion
+```
+
+**Legacy method of consumption**
 
 ```yaml
 AWSTemplateFormatVersion: "2010-09-09"

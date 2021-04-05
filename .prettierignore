@@ -13,5 +13,6 @@
 # Unsupported types
 *.txt
 .gitignore
+.nvmrc
 .prettierignore
 LICENSE

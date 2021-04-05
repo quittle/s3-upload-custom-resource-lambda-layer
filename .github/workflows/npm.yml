@@ -34,3 +34,9 @@ jobs:
             - name: Release
               if: github.ref == 'refs/heads/main'
               run: npm run release
+            - name: GitHub Release
+              if: github.ref == 'refs/heads/main'
+              uses: ncipollo/release-action@v1
+              with:
+                  artifacts: dist/layer.zip
+                  token: ${{ secrets.GITHUB_TOKEN }}
