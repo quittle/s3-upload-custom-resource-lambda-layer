@@ -1,4 +1,8 @@
-on: [push, pull_request]
+on:
+    pull_request:
+    push:
+        branches:
+            - main
 
 jobs:
     build:
@@ -32,10 +36,10 @@ jobs:
             - name: Build and Test
               run: npm run build-and-test
             - name: Release
-              if: github.ref == 'refs/heads/main'
+              if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v')
               run: npm run release
             - name: GitHub Release
-              if: github.ref == 'refs/heads/main'
+              if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v')
               uses: ncipollo/release-action@v1
               with:
                   artifacts: dist/layer.zip
