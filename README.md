@@ -21,7 +21,8 @@ Resources:
     S3UploadLambdaLayer:
         Type: AWS::Serverless::LayerVersion
         Properties:
-            ContentUri: local/path/to/layer.zip # This is the layer downloaded from a release of this project
+            # This can be npm installed or downloaded as a GitHub release artifact
+            ContentUri: node_modules/s3-upload-custom-resource-lambda-layer/dist/layer.zip
     S3UploadLambda:
         Type: AWS::Serverless::Function
         Properties:
