@@ -164,6 +164,12 @@ Other targets of interest
 -   `prettier-fix` - Automatically fixes Prettier issues
 -   `lint-fix` - Automatically fixes ESLint issues
 
+## Releases
+
+1. Push the latest change and wait for the build to pass
+1. Tag the latest commit with the version like so `git tag -a vX.Y.Z -m X.Y.Z` and push the tag
+1. The GitHub release should be created automatically as well as updating the NPM package.
+
 ## Debugging
 
 If you see `ConfigError: Missing region in config` when running the integration test suite. You need to set the AWS region you are testing against in your environment variables. Running `AWS_REGION=us-east-1 npm run integration-test` should solve the problem.
