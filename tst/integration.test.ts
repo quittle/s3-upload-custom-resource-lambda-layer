@@ -201,7 +201,7 @@ async function createStackAndExpectFailure(
         (event) => event.ResourceStatus === "CREATE_FAILED"
     ).map((event) => event.ResourceStatusReason);
 
-    expect(reasons).toContain(expectedFailureReason);
+    expect(reasons).toContainEqual(expect.stringContaining(expectedFailureReason));
 }
 
 describe("all tests", () => {
@@ -302,7 +302,7 @@ describe("all tests", () => {
                 sourceRoot,
                 generatedCloudFormationTemplateFile,
                 { BucketName: rootBucketName, ObjectPrefix: "" },
-                "Failed to create resource. Bucket must be empty"
+                "Received response status [FAILED] from custom resource. Message returned: Bucket must be empty"
             );
         },
         ASYNC_TIMEOUT_MS
@@ -320,7 +320,7 @@ describe("all tests", () => {
                 path.join(exampleRoot, "invalid-s3uploadconfig-src"),
                 generatedCloudFormationTemplateFile,
                 {},
-                "Failed to create resource. Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token T in JSON at position 0"
+                "Received response status [FAILED] from custom resource. Message returned: Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token T in JSON at position 0"
             );
         },
         ASYNC_TIMEOUT_MS
