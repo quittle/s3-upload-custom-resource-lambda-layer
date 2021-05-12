@@ -47,7 +47,9 @@ export abstract class EventHandler {
             } catch (e) {
                 await callback({
                     status: ResponseStatus.FAILED,
-                    reason: `Unable to read or parse ${S3_UPLOAD_CONFIG_FILE}: ${(e as Error).toString()}`,
+                    reason: `Unable to read or parse ${S3_UPLOAD_CONFIG_FILE}: ${(
+                        e as Error
+                    ).toString()}`,
                 });
                 return;
             }
