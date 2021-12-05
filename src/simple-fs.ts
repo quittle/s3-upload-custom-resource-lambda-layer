@@ -33,6 +33,6 @@ export class SimpleFs {
     }
 
     public deleteFolder(root: string): void {
-        fs.rmdirSync(root, { recursive: true });
+        fs.rmSync(root, { recursive: true, force: true });
     }
 }

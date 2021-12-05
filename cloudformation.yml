@@ -9,7 +9,7 @@ Resources:
         Type: AWS::Serverless::LayerVersion
         Properties:
             LayerName: !Ref LayerName
-            CompatibleRuntimes: [nodejs12.x]
+            CompatibleRuntimes: [nodejs14.x]
             ContentUri: dist/layer.zip
             LicenseInfo: Apache-2.0
     S3UploadCustomResourceLayerPermission:
