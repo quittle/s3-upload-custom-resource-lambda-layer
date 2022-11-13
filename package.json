@@ -34,7 +34,7 @@
         "deepmerge": "^4.2.2",
         "eslint": "^8.3.0",
         "jest": "^27.2.5",
-        "minimatch": "^3.0.4",
+        "minimatch": "^3.0.5",
         "prettier": "^2.4.1",
         "ts-jest": "^27.0.5",
         "ts-loader": "^9.2.5",
