@@ -14,6 +14,7 @@
             "made-up-key": "made-up-value",
             "to-be-overridden": "overridden"
         },
-        "contentDisposition": "attachment"
+        "contentDisposition": "attachment",
+        "cacheControl": "max-age=600"
     }
 }

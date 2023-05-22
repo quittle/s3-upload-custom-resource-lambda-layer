@@ -42,6 +42,7 @@ async function compareBucketContents(
         Metadata?: StringMap;
         ContentType?: string;
         ContentDisposition?: string;
+        CacheControl?: string;
     };
     const response = await s3.listObjectsV2({ Bucket: bucketName }).promise();
     const simpleResponse: ObjectDescription[] =
@@ -61,6 +62,10 @@ async function compareBucketContents(
 
             if (typeof description.ContentDisposition !== "undefined") {
                 response.ContentDisposition = description.ContentDisposition;
+            }
+
+            if (typeof description.CacheControl !== "undefined") {
+                response.CacheControl = description.CacheControl;
             }
         })
     );

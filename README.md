@@ -34,7 +34,7 @@ Resources:
             Handler:
                 s3-upload-custom-resource.handler # This is fixed and references a file provided by
                 # this project and available in the Lambda layer.
-            Runtime: nodejs14.x
+            Runtime: nodejs18.x
             Policies:
                 - S3CrudPolicy:
                       BucketName: !Ref WebsiteBucket
@@ -69,7 +69,7 @@ Resources:
             Handler:
                 s3-upload-custom-resource.handler # This is fixed and references a file provided by
                 # this project and available in the Lambda layer.
-            Runtime: nodejs12.x
+            Runtime: nodejs18.x
             Policies:
                 - S3CrudPolicy:
                       BucketName: !Ref WebsiteBucket
@@ -138,7 +138,8 @@ Here is an example `.s3uploadconfig.json` that will make all HTML files vended b
     ".*": {
         "metadata": {
             "hiddenFile": "true"
-        }
+        },
+        "cacheControl": "max-age=600"
     }
 }
 ```

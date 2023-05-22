@@ -32,12 +32,24 @@ describe("S3UploadConfig", () => {
             newS3UploadConfig({ file1: {}, file2: {}, file3: {} });
             newS3UploadConfig({ file: { metadata: {} } });
             newS3UploadConfig({ file: { contentType: {} } });
-            newS3UploadConfig({ file: { metadata: {}, contentType: "", contentDisposition: "" } });
             newS3UploadConfig({
-                file: { metadata: { key: "value" }, contentType: "", contentDisposition: "" },
+                file: { metadata: {}, contentType: "", contentDisposition: "", cacheControl: "" },
             });
             newS3UploadConfig({
-                file: { metadata: null, contentType: null, contentDisposition: null },
+                file: {
+                    metadata: { key: "value" },
+                    contentType: "",
+                    contentDisposition: "",
+                    cacheControl: "",
+                },
+            });
+            newS3UploadConfig({
+                file: {
+                    metadata: null,
+                    contentType: null,
+                    contentDisposition: null,
+                    cacheControl: null,
+                },
             });
             newS3UploadConfig({ file: { unknownKey: "unknownValue" } });
         });
@@ -54,6 +66,7 @@ describe("S3UploadConfig", () => {
                 "src/**/*.png": {
                     contentType: "image/png",
                     contentDisposition: 'attachment; filename="download.png"',
+                    cacheControl: "public",
                 },
             });
         });
@@ -79,6 +92,7 @@ describe("S3UploadConfig", () => {
                         },
                         contentType: "text/plain",
                         contentDisposition: "inline; filename=other-name.txt",
+                        cacheControl: "max-age=600",
                         randomKey: "value",
                     },
                 }).getS3ParamsForKey("file.txt")
@@ -88,6 +102,7 @@ describe("S3UploadConfig", () => {
                 },
                 ContentType: "text/plain",
                 ContentDisposition: "inline; filename=other-name.txt",
+                CacheControl: "max-age=600",
             });
         });
 

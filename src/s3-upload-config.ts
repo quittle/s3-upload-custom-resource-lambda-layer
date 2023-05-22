@@ -1,4 +1,4 @@
-import { IMinimatch, Minimatch } from "minimatch";
+import { Minimatch } from "minimatch";
 import deepmerge from "deepmerge";
 import S3 from "aws-sdk/clients/s3";
 
@@ -13,11 +13,12 @@ interface S3ObjectConfig {
         [key: string]: string;
     };
     contentType?: string;
+    cacheControl?: string;
     contentDisposition?: string;
 }
 
 /** Internal representation of the parsed configuration */
-type ParsedS3UploadConfig = [IMinimatch, S3ObjectConfig][];
+type ParsedS3UploadConfig = [Minimatch, S3ObjectConfig][];
 
 /** Parses an S3 upload config file and provides S3 configuration for individual files */
 class S3UploadConfig {
@@ -58,6 +59,9 @@ class S3UploadConfig {
         }
         if (mergedConfig.contentType) {
             putObjectRequest.ContentType = mergedConfig.contentType;
+        }
+        if (mergedConfig.cacheControl) {
+            putObjectRequest.CacheControl = mergedConfig.cacheControl;
         }
         if (mergedConfig.contentDisposition) {
             putObjectRequest.ContentDisposition = mergedConfig.contentDisposition;

@@ -10,6 +10,7 @@ interface S3Object {
     Metadata: { [key: string]: string | undefined };
     ContentType: string;
     ContentDisposition?: string;
+    CacheControl?: string;
 }
 
 export { fooBarContents1, fooBarContents2, rootContents1, rootContents2, S3Object };

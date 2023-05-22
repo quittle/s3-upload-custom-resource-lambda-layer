@@ -19,6 +19,7 @@
             "to-be-overridden": "overridden"
         },
         "ContentType": "text/plain",
+        "CacheControl": "max-age=600",
         "ContentDisposition": "attachment"
     }
 ]
