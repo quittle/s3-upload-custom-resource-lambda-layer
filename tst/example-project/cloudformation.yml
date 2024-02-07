@@ -18,8 +18,8 @@ Resources:
             Layers: [!Ref S3UploadLambdaLayerArn]
             CodeUri: "!!!source-root!!!"
             Handler: s3-upload-custom-resource.handler
-            Runtime: nodejs18.x
-            Timeout: 30
+            Runtime: nodejs20.x
+            Timeout: 300
             Policies:
                 - S3CrudPolicy:
                       BucketName: !Ref RootTestBucket

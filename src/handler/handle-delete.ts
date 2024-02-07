@@ -4,6 +4,10 @@ import { SimpleFs } from "../simple-fs";
 import { ResponseStatus } from "../cloudformation-types";
 
 export class DeleteHandler extends EventHandler {
+    protected requireValidS3UploadConfig(): boolean {
+        return false;
+    }
+
     protected async handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,

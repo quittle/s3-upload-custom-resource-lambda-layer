@@ -6,6 +6,10 @@ import { S3UploadConfig } from "../s3-upload-config";
 import { S3_UPLOAD_CONFIG_FILE } from "../resources";
 
 export class UpdateHandler extends EventHandler {
+    protected requireValidS3UploadConfig(): boolean {
+        return true;
+    }
+
     protected async handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,

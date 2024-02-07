@@ -325,7 +325,7 @@ describe("all tests", () => {
                 path.join(exampleRoot, "invalid-s3uploadconfig-src"),
                 generatedCloudFormationTemplateFile,
                 {},
-                "Received response status [FAILED] from custom resource. Message returned: Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token T in JSON at position 0"
+                "Received response status [FAILED] from custom resource. Message returned: Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token 'T', \"This is no\"... is not valid JSON"
             );
         },
         ASYNC_TIMEOUT_MS
