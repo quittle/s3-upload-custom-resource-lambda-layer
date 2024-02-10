@@ -1,4 +1,8 @@
-import CloudFormation from "aws-sdk/clients/cloudformation";
+import {
+    CloudFormation,
+    waitUntilStackDeleteComplete,
+    Output,
+} from "@aws-sdk/client-cloudformation";
 
 interface StringMap {
     [key: string]: string;
@@ -9,16 +13,13 @@ async function describeStack(
     cloudFormation: CloudFormation,
     stackName: string
 ): Promise<StringMap> {
-    const descriptions = await cloudFormation.describeStacks({ StackName: stackName }).promise();
-    return descriptions.Stacks![0]!.Outputs!.reduce(
-        (accumulator: StringMap, output: CloudFormation.Output) => {
-            return {
-                [output.OutputKey!]: output.OutputValue,
-                ...accumulator,
-            } as StringMap;
-        },
-        {}
-    );
+    const descriptions = await cloudFormation.describeStacks({ StackName: stackName });
+    return descriptions.Stacks![0]!.Outputs!.reduce((accumulator: StringMap, output: Output) => {
+        return {
+            [output.OutputKey!]: output.OutputValue,
+            ...accumulator,
+        } as StringMap;
+    }, {});
 }
 /* eslint-enable */
 
@@ -26,8 +27,11 @@ async function deleteStackIfExists(
     cloudFormation: CloudFormation,
     stackName: string
 ): Promise<void> {
-    await cloudFormation.deleteStack({ StackName: stackName }).promise();
-    await cloudFormation.waitFor("stackDeleteComplete", { StackName: stackName }).promise();
+    await cloudFormation.deleteStack({ StackName: stackName });
+    await waitUntilStackDeleteComplete(
+        { client: cloudFormation, maxWaitTime: Number.MAX_VALUE },
+        { StackName: stackName }
+    );
 }
 
 export { describeStack, deleteStackIfExists, StringMap };

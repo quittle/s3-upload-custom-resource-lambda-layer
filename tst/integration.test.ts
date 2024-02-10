@@ -1,10 +1,15 @@
 import process from "process";
-import { CloudFormation, S3 } from "aws-sdk/clients/all";
+import {
+    CloudFormation,
+    ListStacksOutput,
+    paginateListStacks,
+    StackSummary,
+} from "@aws-sdk/client-cloudformation";
+import { S3 } from "@aws-sdk/client-s3";
 import { SimpleFs } from "../src/simple-fs";
 import path from "path";
 import childProcess from "child_process";
 import os from "os";
-import { autoPaginate } from "../src/aws-helper";
 
 import {
     fooBarContents1,
@@ -44,7 +49,7 @@ async function compareBucketContents(
         ContentDisposition?: string;
         CacheControl?: string;
     };
-    const response = await s3.listObjectsV2({ Bucket: bucketName }).promise();
+    const response = await s3.listObjectsV2({ Bucket: bucketName });
     const simpleResponse: ObjectDescription[] =
         response.Contents?.map((c) => ({
             Key: c.Key as string,
@@ -54,9 +59,7 @@ async function compareBucketContents(
 
     await Promise.all(
         simpleResponse.map(async (response) => {
-            const description = await s3
-                .headObject({ Bucket: bucketName, Key: response.Key })
-                .promise();
+            const description = await s3.headObject({ Bucket: bucketName, Key: response.Key });
             response.Metadata = description.Metadata;
             response.ContentType = description.ContentType;
 
@@ -175,33 +178,24 @@ async function createStackAndExpectFailure(
 
     await deleteStackIfExists(cloudFormation, stackName);
 
-    /* eslint-disable @typescript-eslint/unbound-method */
-    const stacks: CloudFormation.ListStacksOutput[] = await autoPaginate<
-        CloudFormation,
-        CloudFormation.ListStacksInput,
-        CloudFormation.ListStacksOutput
-    >(cloudFormation, cloudFormation.listStacks, {
-        StackStatusFilter: ["DELETE_COMPLETE"],
-    });
-    /* eslint-enable */
+    const stacks: ListStacksOutput[] = [];
+    for await (const page of paginateListStacks(
+        { client: cloudFormation },
+        { StackStatusFilter: ["DELETE_COMPLETE"] }
+    )) {
+        stacks.push(page);
+    }
 
     const mostRecentStackId = stacks
-        .reduce(
-            (acc: CloudFormation.StackSummary[], response) =>
-                acc.concat(response.StackSummaries || []),
-            []
-        )
+        .reduce((acc: StackSummary[], response) => acc.concat(response.StackSummaries || []), [])
         .filter((summary) => summary.StackName === stackName)
         .map((summary) => ({
             id: summary.StackId,
-            time: summary.DeletionTime!.getTime(), // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            time: summary.DeletionTime?.getTime() ?? 0,
         }))
         .sort((a, b) => b.time - a.time)[0].id;
 
-    const events = await cloudFormation
-        .describeStackEvents({ StackName: mostRecentStackId })
-        .promise();
-
+    const events = await cloudFormation.describeStackEvents({ StackName: mostRecentStackId });
     const reasons = events.StackEvents?.filter(
         (event) => event.ResourceStatus === "CREATE_FAILED"
     ).map((event) => event.ResourceStatusReason);

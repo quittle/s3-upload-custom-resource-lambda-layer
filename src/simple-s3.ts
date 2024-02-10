@@ -1,31 +1,30 @@
-import S3 from "aws-sdk/clients/s3";
-import { autoPaginate } from "./aws-helper";
+import { S3, paginateListObjectsV2, PutObjectRequest } from "@aws-sdk/client-s3";
 
 export class SimpleS3 {
-    private readonly s3: S3 = new S3();
+    private readonly s3 = new S3();
 
     public async deleteObject(bucketName: string, key: string): Promise<void> {
-        await this.s3.deleteObject({ Bucket: bucketName, Key: key }).promise();
+        await this.s3.deleteObject({ Bucket: bucketName, Key: key });
     }
 
     public async listObjects(
         bucketName: string,
         objectPrefix: string | undefined
     ): Promise<string[]> {
-        const response = await autoPaginate<S3, S3.ListObjectsV2Request, S3.ListObjectsV2Output>(
-            this.s3,
-            // eslint-disable-next-line @typescript-eslint/unbound-method
-            this.s3.listObjectsV2,
+        const keys: string[] = [];
+        for await (const page of paginateListObjectsV2(
+            { client: this.s3 },
             {
                 Bucket: bucketName,
                 Prefix: objectPrefix,
             }
-        );
-        const keys = response.reduce(
-            (acc: string[], page) =>
-                acc.concat(page.Contents?.map((object) => object?.Key) as string[]),
-            []
-        );
+        )) {
+            for (const object of page.Contents ?? []) {
+                if (object.Key) {
+                    keys.push(object.Key);
+                }
+            }
+        }
         return keys;
     }
 
@@ -33,20 +32,12 @@ export class SimpleS3 {
         bucketName: string,
         objectPrefix: string | undefined
     ): Promise<boolean> {
-        return await this.s3
-            .listObjectsV2({
-                Bucket: bucketName,
-                Prefix: objectPrefix,
-                MaxKeys: 1,
-            })
-            .promise()
-            .then((data) => {
-                if (data.KeyCount && data.KeyCount > 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
+        const objects = await this.s3.listObjectsV2({
+            Bucket: bucketName,
+            Prefix: objectPrefix,
+            MaxKeys: 1,
+        });
+        return (objects.KeyCount ?? 0) === 0;
     }
 
     public async uploadFile(
@@ -54,17 +45,15 @@ export class SimpleS3 {
         objectPrefix: string | undefined,
         localFilePath: string,
         localFileContents: Buffer,
-        extraParams?: S3.PutObjectRequest
+        extraParams?: PutObjectRequest
     ): Promise<void> {
-        const key = (objectPrefix || "") + localFilePath;
+        const key = (objectPrefix ?? "") + localFilePath;
 
-        await this.s3
-            .upload({
-                Bucket: bucketName,
-                Key: key,
-                Body: localFileContents,
-                ...extraParams,
-            })
-            .promise();
+        await this.s3.putObject({
+            Bucket: bucketName,
+            Key: key,
+            Body: localFileContents,
+            ...extraParams,
+        });
     }
 }

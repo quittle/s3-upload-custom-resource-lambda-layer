@@ -1,6 +1,6 @@
 import { Minimatch } from "minimatch";
 import deepmerge from "deepmerge";
-import S3 from "aws-sdk/clients/s3";
+import { PutObjectRequest } from "@aws-sdk/client-s3";
 
 /** Format of the config file  */
 interface S3UploadFileStructure {
@@ -46,14 +46,14 @@ class S3UploadConfig {
      * @param objectKey The key name to match against in the config
      * @returns A partial S3.PutObjectRequest object based off the configuration
      */
-    public getS3ParamsForKey(objectKey: string): S3.PutObjectRequest {
+    public getS3ParamsForKey(objectKey: string): PutObjectRequest {
         let mergedConfig: S3ObjectConfig = {};
         for (const [matcher, config] of this.parsedS3UploadConfig) {
             if (matcher.match(objectKey)) {
                 mergedConfig = deepmerge(mergedConfig, config);
             }
         }
-        const putObjectRequest = {} as S3.PutObjectRequest;
+        const putObjectRequest = {} as PutObjectRequest;
         if (mergedConfig.metadata) {
             putObjectRequest.Metadata = mergedConfig.metadata;
         }
