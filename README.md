@@ -126,7 +126,7 @@ This may be a Git commit or the hash of the content being deployed. One of the s
 
 ## S3 Object Configuration
 
-You can additionally configure the S3 objects you upload by providing a file with the name `.s3uploadconfig.json` in the root directory of the files you are uploading. This is a JSON file that maps glob-based patterns to configuration to set on the S3 objects. If multiple globs are matched for a given key, they are merged in a non-deterministic order so be careful trying to override values. Currently the only two fields supported are `metadata` and `contentType`. If unspecified, the default `contentType` is defaulted by S3 to `application/octet-stream`.
+You can additionally configure the S3 objects you upload by providing a file with the name `.s3uploadconfig.json` in the root directory of the files you are uploading. This is a JSON file that maps glob-based patterns (using [Minimatch](https://github.com/isaacs/minimatch)) to configuration to set on the S3 objects. If multiple globs are matched for a given key, they are merged in a non-deterministic order so be careful trying to override values. Currently the only two fields supported are `metadata` and `contentType`. If unspecified, the default `contentType` is defaulted by S3 to `application/octet-stream`.
 
 Here is an example `.s3uploadconfig.json` that will make all HTML files vended by S3 pass `text/html` as their `Content-Type` HTTP header if retrieved via CloudFront or S3 static website hosting. It also marks all Unix-style hidden files as hidden in their metadata.
 
