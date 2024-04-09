@@ -11,7 +11,7 @@ export class DeleteHandler extends EventHandler {
     protected async handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,
-        _simpleFs: SimpleFs
+        _simpleFs: SimpleFs,
     ): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
 

@@ -16,7 +16,7 @@ describe("S3UploadConfig", () => {
 
         test("non-json", () => {
             expect(() => new S3UploadConfig("?")).toThrowError(
-                "Unexpected token ? in JSON at position 0"
+                "Unexpected token ? in JSON at position 0",
             );
         });
 
@@ -79,7 +79,7 @@ describe("S3UploadConfig", () => {
 
         test("unexpected config is fine", () => {
             expect(
-                newS3UploadConfig({ file: { random: "entry" } }).getS3ParamsForKey("file")
+                newS3UploadConfig({ file: { random: "entry" } }).getS3ParamsForKey("file"),
             ).toStrictEqual({});
         });
 
@@ -95,7 +95,7 @@ describe("S3UploadConfig", () => {
                         cacheControl: "max-age=600",
                         randomKey: "value",
                     },
-                }).getS3ParamsForKey("file.txt")
+                }).getS3ParamsForKey("file.txt"),
             ).toStrictEqual({
                 Metadata: {
                     key: "value",
@@ -114,7 +114,7 @@ describe("S3UploadConfig", () => {
                             type: "markdown",
                         },
                     },
-                }).getS3ParamsForKey("README.md")
+                }).getS3ParamsForKey("README.md"),
             ).toStrictEqual({
                 Metadata: {
                     type: "markdown",
@@ -136,7 +136,7 @@ describe("S3UploadConfig", () => {
                         },
                         contentType: "text/markdown",
                     },
-                }).getS3ParamsForKey("src/README.md")
+                }).getS3ParamsForKey("src/README.md"),
             ).toStrictEqual({
                 Metadata: {
                     type: "markdown",
@@ -155,7 +155,7 @@ describe("S3UploadConfig", () => {
                     file: {
                         contentType: "override",
                     },
-                }).getS3ParamsForKey("file")
+                }).getS3ParamsForKey("file"),
             ).toStrictEqual({
                 ContentType: "override",
             });
@@ -168,7 +168,7 @@ describe("S3UploadConfig", () => {
                     "*": {
                         contentType: "override",
                     },
-                }).getS3ParamsForKey("file")
+                }).getS3ParamsForKey("file"),
             ).toStrictEqual({
                 ContentType: "override",
             });

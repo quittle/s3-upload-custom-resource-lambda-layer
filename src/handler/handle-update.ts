@@ -14,7 +14,7 @@ export class UpdateHandler extends EventHandler {
         parameters: RequestParameters,
         simpleS3: SimpleS3,
         simpleFs: SimpleFs,
-        s3UploadFile?: S3UploadConfig
+        s3UploadFile?: S3UploadConfig,
     ): Promise<ResultType> {
         const { bucketName, objectPrefix } = parameters;
 
@@ -51,9 +51,9 @@ export class UpdateHandler extends EventHandler {
                             objectPrefix,
                             file,
                             contents,
-                            extraParams
+                            extraParams,
                         );
-                    })
+                    }),
             );
         } catch (e) {
             return {

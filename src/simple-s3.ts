@@ -9,7 +9,7 @@ export class SimpleS3 {
 
     public async listObjects(
         bucketName: string,
-        objectPrefix: string | undefined
+        objectPrefix: string | undefined,
     ): Promise<string[]> {
         const keys: string[] = [];
         for await (const page of paginateListObjectsV2(
@@ -17,7 +17,7 @@ export class SimpleS3 {
             {
                 Bucket: bucketName,
                 Prefix: objectPrefix,
-            }
+            },
         )) {
             for (const object of page.Contents ?? []) {
                 if (object.Key) {
@@ -30,7 +30,7 @@ export class SimpleS3 {
 
     public async isBucketEmpty(
         bucketName: string,
-        objectPrefix: string | undefined
+        objectPrefix: string | undefined,
     ): Promise<boolean> {
         const objects = await this.s3.listObjectsV2({
             Bucket: bucketName,
@@ -45,7 +45,7 @@ export class SimpleS3 {
         objectPrefix: string | undefined,
         localFilePath: string,
         localFileContents: Buffer,
-        extraParams?: PutObjectRequest
+        extraParams?: PutObjectRequest,
     ): Promise<void> {
         const key = (objectPrefix ?? "") + localFilePath;
 

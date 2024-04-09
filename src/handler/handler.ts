@@ -76,6 +76,6 @@ export abstract class EventHandler {
         parameters: RequestParameters,
         simpleS3: SimpleS3,
         simpleFs: SimpleFs,
-        s3UploadConfig?: S3UploadConfig
+        s3UploadConfig?: S3UploadConfig,
     ): Promise<ResultType>;
 }

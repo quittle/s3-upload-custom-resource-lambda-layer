@@ -29,7 +29,7 @@ if (!LAYER_STACK_NAME) {
 
 if (!process.env.AWS_REGION) {
     throw new Error(
-        "AWS_REGION must be passed in as an environment variable. The AWS JS SDK does not support AWS_DEFAULT_REGION."
+        "AWS_REGION must be passed in as an environment variable. The AWS JS SDK does not support AWS_DEFAULT_REGION.",
     );
 }
 
@@ -38,7 +38,7 @@ console.info(`Using Lambda Layer Stack: ${LAYER_STACK_NAME}`);
 async function compareBucketContents(
     s3: S3,
     bucketName: string,
-    expectedContents: S3Object[]
+    expectedContents: S3Object[],
 ): Promise<void> {
     type ObjectDescription = {
         Key: string;
@@ -70,7 +70,7 @@ async function compareBucketContents(
             if (typeof description.CacheControl !== "undefined") {
                 response.CacheControl = description.CacheControl;
             }
-        })
+        }),
     );
 
     expect(simpleResponse).toStrictEqual(expectedContents);
@@ -87,7 +87,7 @@ interface TestStackOutputs {
 
 async function describeTestStack(
     cloudFormation: CloudFormation,
-    stackName: string
+    stackName: string,
 ): Promise<TestStackOutputs> {
     const stringMap = await describeStack(cloudFormation, stackName);
     return {
@@ -98,7 +98,7 @@ async function describeTestStack(
 
 async function describeLayerStack(
     cloudFormation: CloudFormation,
-    stackName: string
+    stackName: string,
 ): Promise<LayerStackOutputs> {
     const stringMap = await describeStack(cloudFormation, stackName);
     return {
@@ -130,7 +130,7 @@ async function packageAndDeployExampleProject(args: {
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const generatedCloudFormationContents = JSON.parse(
-        args.simpleFs.readFile(args.outputFilePath).toString()
+        args.simpleFs.readFile(args.outputFilePath).toString(),
     );
 
     const codeUri: string =
@@ -161,7 +161,7 @@ async function createStackAndExpectFailure(
     sourceRoot: string,
     generatedCloudFormationTemplateFile: string,
     extraCloudFormationParameters: StringMap,
-    expectedFailureReason: string
+    expectedFailureReason: string,
 ): Promise<void> {
     await expect(
         packageAndDeployExampleProject({
@@ -173,7 +173,7 @@ async function createStackAndExpectFailure(
             sourceRoot: sourceRoot,
             outputFilePath: generatedCloudFormationTemplateFile,
             extraCloudFormationParameters,
-        })
+        }),
     ).rejects.toThrow("Failed to create/update the stack");
 
     await deleteStackIfExists(cloudFormation, stackName);
@@ -181,7 +181,7 @@ async function createStackAndExpectFailure(
     const stacks: ListStacksOutput[] = [];
     for await (const page of paginateListStacks(
         { client: cloudFormation },
-        { StackStatusFilter: ["DELETE_COMPLETE"] }
+        { StackStatusFilter: ["DELETE_COMPLETE"] },
     )) {
         stacks.push(page);
     }
@@ -197,7 +197,7 @@ async function createStackAndExpectFailure(
 
     const events = await cloudFormation.describeStackEvents({ StackName: mostRecentStackId });
     const reasons = events.StackEvents?.filter(
-        (event) => event.ResourceStatus === "CREATE_FAILED"
+        (event) => event.ResourceStatus === "CREATE_FAILED",
     ).map((event) => event.ResourceStatusReason);
 
     expect(reasons).toContainEqual(expect.stringContaining(expectedFailureReason));
@@ -252,7 +252,7 @@ describe("all tests", () => {
             });
 
             console.debug(
-                `Cloudformation deployed successfully. Buckets for test => Root Bucket: ${rootBucketName}, FooBar Bucket: ${fooBarBucketName}`
+                `Cloudformation deployed successfully. Buckets for test => Root Bucket: ${rootBucketName}, FooBar Bucket: ${fooBarBucketName}`,
             );
 
             await Promise.all([
@@ -275,7 +275,7 @@ describe("all tests", () => {
                 compareBucketContents(s3, fooBarBucketName, fooBarContents2),
             ]);
         },
-        ASYNC_TIMEOUT_MS
+        ASYNC_TIMEOUT_MS,
     );
 
     test(
@@ -301,10 +301,10 @@ describe("all tests", () => {
                 sourceRoot,
                 generatedCloudFormationTemplateFile,
                 { BucketName: rootBucketName, ObjectPrefix: "" },
-                "Received response status [FAILED] from custom resource. Message returned: Bucket must be empty"
+                "Received response status [FAILED] from custom resource. Message returned: Bucket must be empty",
             );
         },
-        ASYNC_TIMEOUT_MS
+        ASYNC_TIMEOUT_MS,
     );
 
     test(
@@ -319,9 +319,9 @@ describe("all tests", () => {
                 path.join(exampleRoot, "invalid-s3uploadconfig-src"),
                 generatedCloudFormationTemplateFile,
                 {},
-                "Received response status [FAILED] from custom resource. Message returned: Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token 'T', \"This is no\"... is not valid JSON"
+                "Received response status [FAILED] from custom resource. Message returned: Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token 'T', \"This is no\"... is not valid JSON",
             );
         },
-        ASYNC_TIMEOUT_MS
+        ASYNC_TIMEOUT_MS,
     );
 });

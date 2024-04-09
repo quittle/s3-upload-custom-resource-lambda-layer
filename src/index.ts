@@ -35,7 +35,7 @@ async function sendResponse(
     context: CloudformationContext,
     responseStatus: ResponseStatus,
     responseReason?: string,
-    responseData?: Record<string, unknown>
+    responseData?: Record<string, unknown>,
 ): Promise<void> {
     const responseBody = JSON.stringify({
         Status: responseStatus,

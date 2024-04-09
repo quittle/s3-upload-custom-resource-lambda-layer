@@ -20,13 +20,13 @@ describe("SimpleFs", () => {
         test("non-existent file", () => {
             const fileName = "fake-file-that-does-not-exist.txt";
             expect(() => simpleFs.readFile(fileName)).toThrowError(
-                `ENOENT: no such file or directory, open '${fileName}`
+                `ENOENT: no such file or directory, open '${fileName}`,
             );
         });
 
         test("directory fails", () => {
             expect(() => simpleFs.readFile(".")).toThrowError(
-                "EISDIR: illegal operation on a directory, read"
+                "EISDIR: illegal operation on a directory, read",
             );
         });
 
@@ -43,7 +43,7 @@ describe("SimpleFs", () => {
     describe("writeFile", () => {
         test("writing to directory fails", () => {
             expect(() => simpleFs.writeFile(tempDir, "anything")).toThrow(
-                `EISDIR: illegal operation on a directory, open '${tempDir}'`
+                `EISDIR: illegal operation on a directory, open '${tempDir}'`,
             );
         });
 
@@ -81,14 +81,14 @@ describe("SimpleFs", () => {
         test("non-existent directory", () => {
             const directory = "fake-directory-that-does-not-exist";
             expect(() => simpleFs.listFiles(directory)).toThrowError(
-                `ENOENT: no such file or directory, scandir '${directory}'`
+                `ENOENT: no such file or directory, scandir '${directory}'`,
             );
         });
 
         test("file fails", () => {
             const fileName = "package.json";
             expect(() => simpleFs.listFiles(fileName)).toThrowError(
-                `ENOTDIR: not a directory, scandir '${fileName}'`
+                `ENOTDIR: not a directory, scandir '${fileName}'`,
             );
         });
 
@@ -106,7 +106,7 @@ describe("SimpleFs", () => {
                     ".gitignore", // Hidden file
                     "src/index.ts", // In directory
                     "src/__tests__/simple-fs-test.ts", // Deep file in directory
-                ])
+                ]),
             );
 
             // Don't include folders, just files
@@ -126,7 +126,7 @@ describe("SimpleFs", () => {
             const file = path.join(tempDir, "file.txt");
             simpleFs.writeFile(file, "contents");
             expect(() => simpleFs.createFolder(file)).toThrow(
-                `EEXIST: file already exists, mkdir '${file}'`
+                `EEXIST: file already exists, mkdir '${file}'`,
             );
         });
 
@@ -154,7 +154,7 @@ describe("SimpleFs", () => {
             expect(simpleFs.readFile(file).toString()).toEqual(contents);
             simpleFs.deleteFolder(file);
             expect(() => simpleFs.readFile(file).toString()).toThrow(
-                `ENOENT: no such file or directory, open '${file}`
+                `ENOENT: no such file or directory, open '${file}`,
             );
         });
 
@@ -168,10 +168,10 @@ describe("SimpleFs", () => {
             expect(simpleFs.readFile(file).toString()).toEqual(contents);
             simpleFs.deleteFolder(folder);
             expect(() => simpleFs.readFile(file).toString()).toThrow(
-                `ENOENT: no such file or directory, open '${file}`
+                `ENOENT: no such file or directory, open '${file}`,
             );
             expect(() => simpleFs.listFiles(folder).toString()).toThrow(
-                `ENOENT: no such file or directory, scandir '${folder}`
+                `ENOENT: no such file or directory, scandir '${folder}`,
             );
         });
     });

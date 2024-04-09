@@ -5,7 +5,7 @@ function getAwsSdkExternals() {
     return Object.fromEntries(
         Object.keys(packageJson["devDependencies"])
             .filter((key) => key.startsWith("@aws-sdk/client-"))
-            .map((entry) => [entry, entry])
+            .map((entry) => [entry, entry]),
     );
 }
 
