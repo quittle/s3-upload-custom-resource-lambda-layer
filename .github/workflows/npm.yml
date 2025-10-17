@@ -6,8 +6,8 @@ on:
         tags:
             - "v*"
 permissions:
-  id-token: write  # Required for OIDC NPMJS publishing
-  contents: read
+    id-token: write  # Required for OIDC NPMJS publishing
+    contents: read
 
 jobs:
     build:
