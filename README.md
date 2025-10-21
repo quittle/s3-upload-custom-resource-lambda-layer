@@ -34,7 +34,7 @@ Resources:
             Handler:
                 s3-upload-custom-resource.handler # This is fixed and references a file provided by
                 # this project and available in the Lambda layer.
-            Runtime: nodejs18.x
+            Runtime: nodejs22.x
             Policies:
                 - S3CrudPolicy:
                       BucketName: !Ref WebsiteBucket
@@ -69,7 +69,7 @@ Resources:
             Handler:
                 s3-upload-custom-resource.handler # This is fixed and references a file provided by
                 # this project and available in the Lambda layer.
-            Runtime: nodejs18.x
+            Runtime: nodejs22.x
             Policies:
                 - S3CrudPolicy:
                       BucketName: !Ref WebsiteBucket

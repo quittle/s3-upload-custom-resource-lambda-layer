@@ -16,7 +16,7 @@ describe("S3UploadConfig", () => {
 
         test("non-json", () => {
             expect(() => new S3UploadConfig("?")).toThrowError(
-                "Unexpected token ? in JSON at position 0",
+                "Unexpected token '?', \"?\" is not valid JSON",
             );
         });
 
