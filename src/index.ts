@@ -74,7 +74,7 @@ async function sendResponse(
         request.on("error", function (error) {
             console.log("sendResponse Error: ", error);
             // Tell AWS Lambda that the function execution is done
-            reject();
+            reject(error);
         });
 
         // write data to request body

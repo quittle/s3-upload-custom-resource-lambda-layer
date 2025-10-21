@@ -156,14 +156,14 @@ To validate locally before pushing, run `AWS_REGION=us-east-1 npm run build-and-
 
 Other targets of interest
 
--   `build` - Runs the build and generates the lambda layer contents
--   `unit-test` - Runs the unit test suite
--   `integration-test` - Runs the integration test suite (requires AWS credentials)
--   `test` - Runs all tests
--   `release` - This deploys to the production stack. **Do not run manually.**
--   `check` - Runs static analysis and tests
--   `prettier-fix` - Automatically fixes Prettier issues
--   `lint-fix` - Automatically fixes ESLint issues
+- `build` - Runs the build and generates the lambda layer contents
+- `unit-test` - Runs the unit test suite
+- `integration-test` - Runs the integration test suite (requires AWS credentials)
+- `test` - Runs all tests
+- `release` - This deploys to the production stack. **Do not run manually.**
+- `check` - Runs static analysis and tests
+- `prettier-fix` - Automatically fixes Prettier issues
+- `lint-fix` - Automatically fixes ESLint issues
 
 ## Releases
 

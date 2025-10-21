@@ -11,17 +11,17 @@ function newS3UploadConfig(config: Record<string, unknown>): S3UploadConfig {
 describe("S3UploadConfig", () => {
     describe("invalid config", () => {
         test("empty string", () => {
-            expect(() => new S3UploadConfig("")).toThrowError("Unexpected end of JSON input");
+            expect(() => new S3UploadConfig("")).toThrow("Unexpected end of JSON input");
         });
 
         test("non-json", () => {
-            expect(() => new S3UploadConfig("?")).toThrowError(
+            expect(() => new S3UploadConfig("?")).toThrow(
                 "Unexpected token '?', \"?\" is not valid JSON",
             );
         });
 
         test("wrong type", () => {
-            expect(() => new S3UploadConfig("[]")).toThrowError("Invalid config: []");
+            expect(() => new S3UploadConfig("[]")).toThrow("Invalid config: []");
         });
     });
 
