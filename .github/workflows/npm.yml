@@ -7,7 +7,7 @@ on:
             - "v*"
 permissions:
     id-token: write # Required for OIDC NPMJS publishing
-    contents: read
+    contents: write
 
 jobs:
     build:
@@ -33,13 +33,15 @@ jobs:
             - name: PIP Install
               run: |
                   pip3 install awscli --upgrade --user
-            - name: NVM Install
-              run: |
-                  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-                  . $HOME/.nvm/nvm.sh
-                  nvm install
+            - name: Setup NodeJS
+              uses: actions/setup-node@v6
+              with:
+                  node-version-file: .nvmrc
+                  registry-url: "https://registry.npmjs.org"
             - name: NPM Install
-              run: npm ci
+              run: |
+                  npm install --global npm@latest
+                  npm ci
             - name: Build and Test
               run: npm run build-and-test
             - name: Release

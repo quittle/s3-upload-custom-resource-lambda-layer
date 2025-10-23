@@ -38,8 +38,9 @@ export default defineConfig([
             sourceType: "script",
 
             parserOptions: {
-                // project: path.join(__dirname, "tsconfig.json"),
-                projectService: true,
+                projectService: {
+                    allowDefaultProject: ["*.mjs"],
+                },
             },
         },
 
