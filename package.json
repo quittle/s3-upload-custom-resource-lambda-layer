@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "@aws-sdk/client-cloudformation": "^3.913.0",
-        "@aws-sdk/client-s3": "^3.913.0",
+        "@aws-sdk/client-s3": "^3.980.0",
         "@types/jest": "^30.0.0",
         "@types/minimatch": "^6.0.0",
         "@types/node": "^24.9.1",
