@@ -35,7 +35,7 @@
         "@types/minimatch": "^6.0.0",
         "@types/node": "^24.9.1",
         "@typescript-eslint/eslint-plugin": "^8.46.2",
-        "@typescript-eslint/parser": "^8.46.2",
+        "@typescript-eslint/parser": "^8.60.0",
         "deepmerge": "^4.3.1",
         "eslint": "^9.38.0",
         "jest": "^30.2.0",
