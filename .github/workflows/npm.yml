@@ -9,6 +9,10 @@ permissions:
     id-token: write # Required for OIDC NPMJS publishing
     contents: write
 
+concurrency:
+    group: npm-build-and-test
+    queue: max
+
 jobs:
     build:
         runs-on: ubuntu-latest
