@@ -29,8 +29,8 @@
         "release": "npm run build && npm run package && npm run deploy"
     },
     "devDependencies": {
-        "@aws-sdk/client-cloudformation": "^3.913.0",
-        "@aws-sdk/client-s3": "^3.913.0",
+        "@aws-sdk/client-cloudformation": "^3.1054.0",
+        "@aws-sdk/client-s3": "^3.1054.0",
         "@types/jest": "^30.0.0",
         "@types/minimatch": "^6.0.0",
         "@types/node": "^24.9.1",
@@ -40,12 +40,12 @@
         "eslint": "^9.38.0",
         "jest": "^30.2.0",
         "jiti": "^2.6.1",
-        "minimatch": "^10.0.3",
+        "minimatch": "^10.2.5",
         "prettier": "^3.6.2",
         "ts-jest": "^29.4.5",
         "ts-loader": "^9.5.4",
         "typescript": "^5.9.3",
-        "webpack": "^5.102.1",
+        "webpack": "^5.107.2",
         "webpack-cli": "^6.0.1"
     }
 }
