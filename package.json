@@ -42,7 +42,7 @@
         "jiti": "^2.7.0",
         "minimatch": "^10.2.5",
         "prettier": "^3.6.2",
-        "ts-jest": "^29.4.5",
+        "ts-jest": "^29.4.11",
         "ts-loader": "^9.5.4",
         "typescript": "^5.9.3",
         "webpack": "^5.107.2",
