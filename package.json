@@ -43,7 +43,7 @@
         "minimatch": "^10.2.5",
         "prettier": "^3.6.2",
         "ts-jest": "^29.4.11",
-        "ts-loader": "^9.5.4",
+        "ts-loader": "^9.6.0",
         "typescript": "^5.9.3",
         "webpack": "^5.107.2",
         "webpack-cli": "^6.0.1"
