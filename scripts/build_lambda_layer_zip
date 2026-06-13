@@ -12,4 +12,3 @@ cp "${build_dir}/s3-upload-custom-resource.js" "${lambda_layer_dir}"
     cd "${tmp_dir}"
     zip -r ../layer.zip nodejs
 )
- 
