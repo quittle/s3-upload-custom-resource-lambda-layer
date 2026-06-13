@@ -17,7 +17,7 @@
         "unit-test": "jest src",
         "integration-test": "npm run build && npm run package && npm run integration-test:deploy-layer && npm run integration-test:run",
         "integration-test:deploy-layer": "scripts/deploy_lambda_layer S3UploadCustomResourceBeta s3-upload-custom-resource-lambda-layer-beta",
-        "integration-test:run": "LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst",
+        "integration-test:run": "NODE_OPTIONS='--experimental-vm-modules' LAYER_STACK_NAME=s3-upload-custom-resource-lambda-layer-beta jest tst",
         "package": "scripts/build_lambda_layer_zip",
         "lint": "eslint . --ext .mjs,.js,.ts",
         "lint-fix": "eslint . --ext .mjs,.js,.ts --fix",
