@@ -29,7 +29,7 @@
         "release": "npm run build && npm run package && npm run deploy"
     },
     "devDependencies": {
-        "@aws-sdk/client-cloudformation": "^3.1060.0",
+        "@aws-sdk/client-cloudformation": "^3.1078.0",
         "@aws-sdk/client-s3": "^3.1078.0",
         "@types/jest": "^30.0.0",
         "@types/minimatch": "^6.0.0",
