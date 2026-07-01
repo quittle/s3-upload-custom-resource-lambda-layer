@@ -33,7 +33,7 @@
         "@aws-sdk/client-s3": "^3.1078.0",
         "@types/jest": "^30.0.0",
         "@types/minimatch": "^6.0.0",
-        "@types/node": "^24.9.1",
+        "@types/node": "^26.1.0",
         "@typescript-eslint/eslint-plugin": "^8.62.1",
         "@typescript-eslint/parser": "^8.60.1",
         "deepmerge": "^4.3.1",
