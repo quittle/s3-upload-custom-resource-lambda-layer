@@ -42,7 +42,7 @@
         "eslint": "^10.14.0",
         "jest": "^30.5.2",
         "jiti": "^2.7.0",
-        "minimatch": "^10.2.6",
+        "minimatch": "^11.0.1",
         "prettier": "^3.9.10",
         "ts-jest": "^29.4.14",
         "ts-loader": "^9.6.2",
