@@ -80,6 +80,57 @@ describe("S3UploadConfig", () => {
         });
     });
 
+    describe("redirects", () => {
+        test("no redirects section", () => {
+            expect(newS3UploadConfig({}).getRedirects()).toStrictEqual({});
+            expect(
+                newS3UploadConfig({ "file.txt": { contentType: "text/plain" } }).getRedirects(),
+            ).toStrictEqual({});
+        });
+
+        test("redirects are returned", () => {
+            expect(
+                newS3UploadConfig({
+                    redirects: { rsvp: "/#rsvp", "old-page": "/new-page" },
+                }).getRedirects(),
+            ).toStrictEqual({ rsvp: "/#rsvp", "old-page": "/new-page" });
+        });
+
+        test("redirects key is not treated as a file glob", () => {
+            const config = newS3UploadConfig({
+                redirects: { rsvp: "/#rsvp" },
+            });
+            expect(config.getS3ParamsForKey("redirects")).toStrictEqual({});
+            expect(config.getS3ParamsForKey("rsvp")).toStrictEqual({});
+        });
+
+        test("glob redirect path is rejected", () => {
+            expect(() => newS3UploadConfig({ redirects: { "*.txt": "/x" } })).toThrow(
+                'Invalid redirect path "*.txt"',
+            );
+            expect(() => newS3UploadConfig({ redirects: { "a[bc]": "/x" } })).toThrow(
+                'Invalid redirect path "a[bc]"',
+            );
+            expect(() => newS3UploadConfig({ redirects: { "a{b,c}": "/x" } })).toThrow(
+                'Invalid redirect path "a{b,c}"',
+            );
+        });
+
+        test("non-string redirect target is rejected", () => {
+            expect(() => newS3UploadConfig({ redirects: { rsvp: 123 } })).toThrow(
+                'Invalid redirect target for "rsvp"',
+            );
+            expect(() => newS3UploadConfig({ redirects: { rsvp: null } })).toThrow(
+                'Invalid redirect target for "rsvp"',
+            );
+        });
+
+        test("non-object redirects is rejected", () => {
+            expect(() => newS3UploadConfig({ redirects: "foo" })).toThrow("Invalid redirects");
+            expect(() => newS3UploadConfig({ redirects: [] })).toThrow("Invalid redirects");
+        });
+    });
+
     describe("getS3ParamsForKey", () => {
         test("unknown key", () => {
             expect(newS3UploadConfig({}).getS3ParamsForKey("unknown key")).toStrictEqual({});

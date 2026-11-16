@@ -128,7 +128,9 @@ This may be a Git commit or the hash of the content being deployed. One of the s
 
 You can additionally configure the S3 objects you upload by providing a file with the name `.s3uploadconfig.json` in the root directory of the files you are uploading. This is a JSON file that maps glob-based patterns (using [Minimatch](https://github.com/isaacs/minimatch)) to configuration to set on the S3 objects. If multiple globs are matched for a given key, they are merged in a non-deterministic order so be careful trying to override values. The supported fields are `metadata`, `contentType`, `cacheControl`, `contentDisposition`, and `websiteRedirectLocation`. If unspecified, the default `contentType` is defaulted by S3 to `application/octet-stream`. Set `websiteRedirectLocation` to a URL or path to have S3 serve the object as a redirect to that location.
 
-Here is an example `.s3uploadconfig.json` that will make all HTML files vended by S3 pass `text/html` as their `Content-Type` HTTP header if retrieved via CloudFront or S3 static website hosting. It also marks all Unix-style hidden files as hidden in their metadata, serves PDFs under `files/` as downloads, and redirects `old-page` to `/new-page`.
+The config can also declare redirect objects that have no corresponding file, under a top-level `redirects` key mapping an explicit object key to its redirect target. Each redirect path must be an explicit path, not a glob, and must not match any uploaded file; otherwise the deployment fails. Each redirect is created as an empty object with its `WebsiteRedirectLocation` set.
+
+Here is an example `.s3uploadconfig.json` that will make all HTML files vended by S3 pass `text/html` as their `Content-Type` HTTP header if retrieved via CloudFront or S3 static website hosting. It also marks all Unix-style hidden files as hidden in their metadata, serves PDFs under `files/` as downloads, and redirects `old-page` to `/new-page` without needing an `old-page` file.
 
 ```json
 {
@@ -144,8 +146,8 @@ Here is an example `.s3uploadconfig.json` that will make all HTML files vended b
     "files/*.pdf": {
         "contentDisposition": "attachment"
     },
-    "old-page": {
-        "websiteRedirectLocation": "/new-page"
+    "redirects": {
+        "old-page": "/new-page"
     }
 }
 ```
