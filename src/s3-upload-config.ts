@@ -15,6 +15,7 @@ interface S3ObjectConfig {
     contentType?: string;
     cacheControl?: string;
     contentDisposition?: string;
+    websiteRedirectLocation?: string;
 }
 
 /** Internal representation of the parsed configuration */
@@ -65,6 +66,9 @@ class S3UploadConfig {
         }
         if (mergedConfig.contentDisposition) {
             putObjectRequest.ContentDisposition = mergedConfig.contentDisposition;
+        }
+        if (mergedConfig.websiteRedirectLocation) {
+            putObjectRequest.WebsiteRedirectLocation = mergedConfig.websiteRedirectLocation;
         }
         return putObjectRequest;
     }
