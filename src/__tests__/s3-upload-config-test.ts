@@ -33,7 +33,13 @@ describe("S3UploadConfig", () => {
             newS3UploadConfig({ file: { metadata: {} } });
             newS3UploadConfig({ file: { contentType: {} } });
             newS3UploadConfig({
-                file: { metadata: {}, contentType: "", contentDisposition: "", cacheControl: "" },
+                file: {
+                    metadata: {},
+                    contentType: "",
+                    contentDisposition: "",
+                    cacheControl: "",
+                    websiteRedirectLocation: "",
+                },
             });
             newS3UploadConfig({
                 file: {
@@ -41,6 +47,7 @@ describe("S3UploadConfig", () => {
                     contentType: "",
                     contentDisposition: "",
                     cacheControl: "",
+                    websiteRedirectLocation: "",
                 },
             });
             newS3UploadConfig({
@@ -49,6 +56,7 @@ describe("S3UploadConfig", () => {
                     contentType: null,
                     contentDisposition: null,
                     cacheControl: null,
+                    websiteRedirectLocation: null,
                 },
             });
             newS3UploadConfig({ file: { unknownKey: "unknownValue" } });
@@ -93,6 +101,7 @@ describe("S3UploadConfig", () => {
                         contentType: "text/plain",
                         contentDisposition: "inline; filename=other-name.txt",
                         cacheControl: "max-age=600",
+                        websiteRedirectLocation: "/new-location",
                         randomKey: "value",
                     },
                 }).getS3ParamsForKey("file.txt"),
@@ -103,6 +112,7 @@ describe("S3UploadConfig", () => {
                 ContentType: "text/plain",
                 ContentDisposition: "inline; filename=other-name.txt",
                 CacheControl: "max-age=600",
+                WebsiteRedirectLocation: "/new-location",
             });
         });
 
