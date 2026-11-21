@@ -1,0 +1,32 @@
+[
+    {
+        "ContentType": "text/plain",
+        "ETag": "\"6f5902ac237024bdd0c176cb93063dc4\"",
+        "Key": "bar/file.txt",
+        "Metadata": { "key": "value" },
+        "Size": 12
+    },
+    {
+        "ContentType": "application/octet-stream",
+        "ETag": "\"d41d8cd98f00b204e9800998ecf8427e\"",
+        "Key": "bar/old-page",
+        "Metadata": {},
+        "Size": 0,
+        "WebsiteRedirectLocation": "/new-page"
+    },
+    {
+        "ContentType": "text/plain",
+        "ETag": "\"6f5902ac237024bdd0c176cb93063dc4\"",
+        "Key": "foo/file.txt",
+        "Metadata": { "key": "value" },
+        "Size": 12
+    },
+    {
+        "ContentType": "application/octet-stream",
+        "ETag": "\"d41d8cd98f00b204e9800998ecf8427e\"",
+        "Key": "foo/old-page",
+        "Metadata": {},
+        "Size": 0,
+        "WebsiteRedirectLocation": "/new-page"
+    }
+]

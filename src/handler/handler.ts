@@ -72,6 +72,47 @@ export abstract class EventHandler {
 
     protected abstract requireValidS3UploadConfig(): boolean;
 
+    /**
+     * Creates the redirect objects declared in the config. Redirect paths
+     * must not match any uploaded file; if one does, the deploy fails
+     * rather than silently shadowing the file with a redirect.
+     * Returns null on success, or a FAILED result on validation/upload error.
+     */
+    protected async createRedirects(
+        parameters: RequestParameters,
+        simpleS3: SimpleS3,
+        files: string[],
+        s3UploadConfig?: S3UploadConfig,
+    ): Promise<ResultType | null> {
+        const redirects = s3UploadConfig?.getRedirects() ?? {};
+        for (const path of Object.keys(redirects)) {
+            if (files.includes(path)) {
+                return {
+                    status: ResponseStatus.FAILED,
+                    reason: `Redirect path "${path}" matches an uploaded file; redirect paths must not match any file.`,
+                };
+            }
+        }
+        try {
+            await Promise.all(
+                Object.entries(redirects).map(([path, target]) =>
+                    simpleS3.createRedirect(
+                        parameters.bucketName,
+                        parameters.objectPrefix,
+                        path,
+                        target,
+                    ),
+                ),
+            );
+        } catch (e) {
+            return {
+                status: ResponseStatus.FAILED,
+                reason: `Unable to create redirect objects in S3. (${(e as Error).toString()})`,
+            };
+        }
+        return null;
+    }
+
     protected abstract handleEvent(
         parameters: RequestParameters,
         simpleS3: SimpleS3,

@@ -14,8 +14,10 @@ import os from "os";
 import {
     fooBarContents1,
     fooBarContents2,
+    fooBarContents3,
     rootContents1,
     rootContents2,
+    rootContents3,
     S3Object,
 } from "./test-data";
 import { describeStack, StringMap, deleteStackIfExists } from "./test-helpers";
@@ -48,6 +50,7 @@ async function compareBucketContents(
         ContentType?: string;
         ContentDisposition?: string;
         CacheControl?: string;
+        WebsiteRedirectLocation?: string;
     };
     const response = await s3.listObjectsV2({ Bucket: bucketName });
     const simpleResponse: ObjectDescription[] =
@@ -69,6 +72,10 @@ async function compareBucketContents(
 
             if (typeof description.CacheControl !== "undefined") {
                 response.CacheControl = description.CacheControl;
+            }
+
+            if (typeof description.WebsiteRedirectLocation !== "undefined") {
+                response.WebsiteRedirectLocation = description.WebsiteRedirectLocation;
             }
         }),
     );
@@ -321,6 +328,32 @@ describe("all tests", () => {
                 {},
                 "Received response status [FAILED] from custom resource. Message returned: Unable to read or parse .s3uploadconfig.json: SyntaxError: Unexpected token 'T', \"This is no\"... is not valid JSON",
             );
+        },
+        ASYNC_TIMEOUT_MS,
+    );
+
+    test(
+        "Version 1 config with redirects",
+        async () => {
+            const template = path.join(exampleRoot, "cloudformation.yml");
+            const { rootBucketName, fooBarBucketName } = await packageAndDeployExampleProject({
+                cloudFormation,
+                simpleFs,
+                stackName: TEST_STACK_NAME,
+                layerArn,
+                cloudformationBase: template,
+                sourceRoot: path.join(exampleRoot, "src-3"),
+                outputFilePath: generatedCloudFormationTemplateFile,
+            });
+
+            console.debug(
+                `Cloudformation deployed successfully. Buckets for test => Root Bucket: ${rootBucketName}, FooBar Bucket: ${fooBarBucketName}`,
+            );
+
+            await Promise.all([
+                compareBucketContents(s3, rootBucketName, rootContents3),
+                compareBucketContents(s3, fooBarBucketName, fooBarContents3),
+            ]);
         },
         ASYNC_TIMEOUT_MS,
     );

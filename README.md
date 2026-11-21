@@ -126,26 +126,39 @@ This may be a Git commit or the hash of the content being deployed. One of the s
 
 ## S3 Object Configuration
 
-You can additionally configure the S3 objects you upload by providing a file with the name `.s3uploadconfig.json` in the root directory of the files you are uploading. This is a JSON file that maps glob-based patterns (using [Minimatch](https://github.com/isaacs/minimatch)) to configuration to set on the S3 objects. If multiple globs are matched for a given key, they are merged in a non-deterministic order so be careful trying to override values. The supported fields are `metadata`, `contentType`, `cacheControl`, `contentDisposition`, and `websiteRedirectLocation`. If unspecified, the default `contentType` is defaulted by S3 to `application/octet-stream`. Set `websiteRedirectLocation` to a URL or path to have S3 serve the object as a redirect to that location.
+You can additionally configure the S3 objects you upload by providing a file with the name `.s3uploadconfig.json` in the root directory of the files you are uploading.
 
-Here is an example `.s3uploadconfig.json` that will make all HTML files vended by S3 pass `text/html` as their `Content-Type` HTTP header if retrieved via CloudFront or S3 static website hosting. It also marks all Unix-style hidden files as hidden in their metadata, serves PDFs under `files/` as downloads, and redirects `old-page` to `/new-page`.
+### Versions
+
+The config file has a top-level, integer `version` field. The current version is 1. A config with no `version` field is implicitly version 0.
+
+Version 1 is an object with three top-level keys: `version`, `files`, and `redirects`. `files` maps glob-based patterns (using [Minimatch](https://github.com/isaacs/minimatch)) to configuration to set on the S3 objects. If multiple globs are matched for a given key, they are merged in a non-deterministic order so be careful trying to override values. The supported fields are `metadata`, `contentType`, `cacheControl`, `contentDisposition`, and `websiteRedirectLocation`. If unspecified, the default `contentType` is defaulted by S3 to `application/octet-stream`. Set `websiteRedirectLocation` to a URL or path to have S3 serve the object as a redirect to that location.
+
+`redirects` declares redirect objects that have no corresponding file, mapping an explicit object key to its redirect target. Each redirect path must be an explicit path, not a glob, and must not match any uploaded file; otherwise the deployment fails. Each redirect is created as an empty object with its `WebsiteRedirectLocation` set.
+
+Version 0 is the original flat format: the whole JSON object is the `files` map. A config is either version 0 or version 1, and each is parsed and validated on its own terms.
+
+Here is an example version 1 `.s3uploadconfig.json` that will make all HTML files vended by S3 pass `text/html` as their `Content-Type` HTTP header if retrieved via CloudFront or S3 static website hosting. It also marks all Unix-style hidden files as hidden in their metadata, serves PDFs under `files/` as downloads, and redirects `old-page` to `/new-page` without needing an `old-page` file.
 
 ```json
 {
-    "**/*.html": {
-        "contentType": "text/html"
-    },
-    ".*": {
-        "metadata": {
-            "hiddenFile": "true"
+    "version": 1,
+    "files": {
+        "**/*.html": {
+            "contentType": "text/html"
         },
-        "cacheControl": "max-age=600"
+        ".*": {
+            "metadata": {
+                "hiddenFile": "true"
+            },
+            "cacheControl": "max-age=600"
+        },
+        "files/*.pdf": {
+            "contentDisposition": "attachment"
+        }
     },
-    "files/*.pdf": {
-        "contentDisposition": "attachment"
-    },
-    "old-page": {
-        "websiteRedirectLocation": "/new-page"
+    "redirects": {
+        "old-page": "/new-page"
     }
 }
 ```

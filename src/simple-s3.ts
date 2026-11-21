@@ -56,4 +56,18 @@ export class SimpleS3 {
             ...extraParams,
         });
     }
+
+    public async createRedirect(
+        bucketName: string,
+        objectPrefix: string | undefined,
+        key: string,
+        redirectLocation: string,
+    ): Promise<void> {
+        await this.s3.putObject({
+            Bucket: bucketName,
+            Key: (objectPrefix ?? "") + key,
+            Body: Buffer.alloc(0),
+            WebsiteRedirectLocation: redirectLocation,
+        });
+    }
 }
