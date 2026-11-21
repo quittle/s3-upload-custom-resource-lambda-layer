@@ -31,7 +31,6 @@ describe("S3UploadConfig", () => {
             newS3UploadConfig({ file: {} });
             newS3UploadConfig({ file1: {}, file2: {}, file3: {} });
             newS3UploadConfig({ file: { metadata: {} } });
-            newS3UploadConfig({ file: { contentType: {} } });
             newS3UploadConfig({
                 file: {
                     metadata: {},
@@ -50,16 +49,22 @@ describe("S3UploadConfig", () => {
                     websiteRedirectLocation: "",
                 },
             });
-            newS3UploadConfig({
-                file: {
-                    metadata: null,
-                    contentType: null,
-                    contentDisposition: null,
-                    cacheControl: null,
-                    websiteRedirectLocation: null,
-                },
-            });
-            newS3UploadConfig({ file: { unknownKey: "unknownValue" } });
+        });
+
+        test("invalid per-file values are rejected", () => {
+            expect(() => newS3UploadConfig({ file: { contentType: {} } })).toThrow();
+            expect(() =>
+                newS3UploadConfig({
+                    file: {
+                        metadata: null,
+                        contentType: null,
+                        contentDisposition: null,
+                        cacheControl: null,
+                        websiteRedirectLocation: null,
+                    },
+                }),
+            ).toThrow();
+            expect(() => newS3UploadConfig({ file: { unknownKey: "unknownValue" } })).toThrow();
         });
 
         test("expected config", () => {
@@ -80,15 +85,178 @@ describe("S3UploadConfig", () => {
         });
     });
 
+    describe("redirects", () => {
+        test("no redirects section", () => {
+            expect(newS3UploadConfig({}).getRedirects()).toBeUndefined();
+            expect(
+                newS3UploadConfig({ "file.txt": { contentType: "text/plain" } }).getRedirects(),
+            ).toBeUndefined();
+            expect(newS3UploadConfig({ version: 1 }).getRedirects()).toBeUndefined();
+        });
+
+        test("redirects are returned", () => {
+            expect(
+                newS3UploadConfig({
+                    version: 1,
+                    redirects: { rsvp: "/#rsvp", "old-page": "/new-page" },
+                }).getRedirects(),
+            ).toStrictEqual({ rsvp: "/#rsvp", "old-page": "/new-page" });
+        });
+
+        test("redirects are not supported in version 0", () => {
+            // In a versionless config, "redirects" is just a glob key and its
+            // value is not a valid per-file config, so it is rejected.
+            expect(() => newS3UploadConfig({ redirects: { rsvp: "/#rsvp" } })).toThrow();
+        });
+
+        test("redirects key is not treated as a file glob", () => {
+            const config = newS3UploadConfig({
+                version: 1,
+                redirects: { rsvp: "/#rsvp" },
+            });
+            expect(config.getS3ParamsForKey("redirects")).toStrictEqual({});
+            expect(config.getS3ParamsForKey("rsvp")).toStrictEqual({});
+        });
+
+        test("glob redirect path is rejected", () => {
+            expect(() => newS3UploadConfig({ version: 1, redirects: { "*.txt": "/x" } })).toThrow(
+                'Invalid redirect path "*.txt"',
+            );
+            expect(() => newS3UploadConfig({ version: 1, redirects: { "a[bc]": "/x" } })).toThrow(
+                'Invalid redirect path "a[bc]"',
+            );
+        });
+
+        test("non-string redirect target is rejected", () => {
+            expect(() => newS3UploadConfig({ version: 1, redirects: { rsvp: 123 } })).toThrow();
+            expect(() => newS3UploadConfig({ version: 1, redirects: { rsvp: null } })).toThrow();
+        });
+
+        test("non-object redirects is rejected", () => {
+            expect(() => newS3UploadConfig({ version: 1, redirects: "foo" })).toThrow();
+            expect(() => newS3UploadConfig({ version: 1, redirects: [] })).toThrow();
+        });
+    });
+
+    describe("versions", () => {
+        test("version 0 is the flat format", () => {
+            const config = newS3UploadConfig({
+                "file.txt": { contentType: "text/plain" },
+            });
+            expect(config.getS3ParamsForKey("file.txt")).toStrictEqual({
+                ContentType: "text/plain",
+            });
+            expect(config.getRedirects()).toBeUndefined();
+        });
+
+        test("explicit version 0 is rejected", () => {
+            // Version 0 has no "version" field; an explicit one must be 1.
+            expect(() =>
+                newS3UploadConfig({
+                    version: 0,
+                    "file.txt": { contentType: "text/plain" },
+                }),
+            ).toThrow("Unsupported config version: 0");
+        });
+
+        test("version 1 parses files and redirects", () => {
+            const config = newS3UploadConfig({
+                version: 1,
+                files: {
+                    "file.txt": { contentType: "text/plain" },
+                },
+                redirects: { rsvp: "/#rsvp" },
+            });
+            expect(config.getS3ParamsForKey("file.txt")).toStrictEqual({
+                ContentType: "text/plain",
+            });
+            expect(config.getRedirects()).toStrictEqual({ rsvp: "/#rsvp" });
+            expect(config.getS3ParamsForKey("rsvp")).toStrictEqual({});
+            expect(config.getS3ParamsForKey("files")).toStrictEqual({});
+            expect(config.getS3ParamsForKey("version")).toStrictEqual({});
+        });
+
+        test("no version field means version 0, so a files key is just a glob", () => {
+            // Without a version, the keys are file globs. A "files" key whose
+            // value is a nested map is not a valid per-file config, so it is
+            // rejected rather than treated as the version 1 files section.
+            expect(() =>
+                newS3UploadConfig({
+                    files: {
+                        "file.txt": { contentType: "text/plain" },
+                    },
+                    redirects: { rsvp: "/#rsvp" },
+                }),
+            ).toThrow();
+        });
+
+        test("version 1 with only a version field is empty", () => {
+            const config = newS3UploadConfig({ version: 1 });
+            expect(config.getS3ParamsForKey("file.txt")).toStrictEqual({});
+            expect(config.getRedirects()).toBeUndefined();
+        });
+
+        test("version 1 files entries still support websiteRedirectLocation", () => {
+            const config = newS3UploadConfig({
+                version: 1,
+                files: {
+                    rsvp: { websiteRedirectLocation: "/#rsvp" },
+                },
+            });
+            expect(config.getS3ParamsForKey("rsvp")).toStrictEqual({
+                WebsiteRedirectLocation: "/#rsvp",
+            });
+        });
+
+        test("unknown version is rejected", () => {
+            expect(() => newS3UploadConfig({ version: 2, files: {} })).toThrow(
+                "Unsupported config version: 2",
+            );
+            expect(() => newS3UploadConfig({ version: "1", files: {} })).toThrow(
+                'Unsupported config version: "1"',
+            );
+            expect(() => newS3UploadConfig({ version: 1.5, files: {} })).toThrow(
+                "Unsupported config version: 1.5",
+            );
+        });
+
+        test("unknown top-level keys in version 1 are rejected", () => {
+            // ZodError serializes its issues as JSON, so the key names are
+            // escaped; matching on the error kind is enough here.
+            expect(() => newS3UploadConfig({ version: 1, files: {}, extra: {} })).toThrow(
+                "Unrecognized key",
+            );
+            expect(() => newS3UploadConfig({ version: 1, files: {}, "**/*.txt": {} })).toThrow(
+                "Unrecognized key",
+            );
+        });
+
+        test("a files key in a versionless config is just a glob", () => {
+            // "files" is just a glob name in version 0. With a valid
+            // per-file config as its value it matches a file named "files";
+            // with a nested map as its value it is rejected.
+            const config = newS3UploadConfig({
+                files: { contentType: "text/plain" },
+            });
+            expect(config.getS3ParamsForKey("files")).toStrictEqual({
+                ContentType: "text/plain",
+            });
+            expect(() => newS3UploadConfig({ files: { "file.txt": {} } })).toThrow();
+        });
+
+        test("non-object files in version 1 is rejected", () => {
+            expect(() => newS3UploadConfig({ version: 1, files: "foo" })).toThrow();
+            expect(() => newS3UploadConfig({ version: 1, files: [] })).toThrow();
+        });
+    });
+
     describe("getS3ParamsForKey", () => {
         test("unknown key", () => {
             expect(newS3UploadConfig({}).getS3ParamsForKey("unknown key")).toStrictEqual({});
         });
 
-        test("unexpected config is fine", () => {
-            expect(
-                newS3UploadConfig({ file: { random: "entry" } }).getS3ParamsForKey("file"),
-            ).toStrictEqual({});
+        test("unknown per-file key is rejected", () => {
+            expect(() => newS3UploadConfig({ file: { random: "entry" } })).toThrow();
         });
 
         test("strict match file", () => {
@@ -102,7 +270,6 @@ describe("S3UploadConfig", () => {
                         contentDisposition: "inline; filename=other-name.txt",
                         cacheControl: "max-age=600",
                         websiteRedirectLocation: "/new-location",
-                        randomKey: "value",
                     },
                 }).getS3ParamsForKey("file.txt"),
             ).toStrictEqual({

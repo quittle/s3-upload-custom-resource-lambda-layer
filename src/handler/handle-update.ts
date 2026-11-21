@@ -62,6 +62,16 @@ export class UpdateHandler extends EventHandler {
             };
         }
 
+        const redirectResult = await this.createRedirects(
+            parameters,
+            simpleS3,
+            files,
+            s3UploadFile,
+        );
+        if (redirectResult) {
+            return redirectResult;
+        }
+
         return {
             status: ResponseStatus.SUCCESS,
         };
